@@ -416,60 +416,6 @@ enddec
     #endif
 endfunc
 #--------------------------------------------------------
-#func Iplay2(vox_name) #播放一个语音，并且优先播放前面带区号的
-#    MyShowLine(ln,vox_name);
-#    tf_toneint(ln,ENABLE);
-#    if (tf_stat(ln)<>0)
-#        MyAbort(ln);
-#    endif
-#    if (JustGetDigit)
-#        JustGetDigit=0;
-#        tf_play(ln,MyDir&"1s.VOC");
-#    endif
-#    if(FileExist(MyDir&AreaCode&vox_name&".VOC"))
-#        if(DEBUG)
-#            voslogln(ln, MyDir&AreaCode&vox_name&".VOC");
-#        endif
-#        tf_play(ln, MyDir&AreaCode&vox_name&".VOC");
-#    else
-#        if(DEBUG)
-#            voslogln(ln, MyDir&vox_name&".VOC");
-#        endif
-#        tf_play(ln, MyDir&vox_name&".VOC");
-#    endif
-#endfunc
-#--------------------------------------------------------
-#func Iplay1(vox_name) #播放一个语音，直到有按键按下
-#    MyShowLine(ln,vox_name);
-#    tf_toneint(ln,ENABLE);
-#    if (tf_stat(ln)<>0)
-#        MyAbort(ln);
-#    endif
-#    if (JustGetDigit)
-#        JustGetDigit=0;
-#        tf_play(ln,MyDir&"1s.VOC");
-#    endif
-#    while(1)
-#        if(FileExist(MyDir&AreaCode&vox_name&".VOC"))
-#            if(DEBUG)
-#                voslogln(ln, MyDir&AreaCode&vox_name&".VOC");
-#            endif
-#            tf_play(ln, MyDir&AreaCode&vox_name&".VOC");
-#        else
-#            if(DEBUG)
-#                voslogln(ln, MyDir&vox_name&".VOC");
-#            endif
-#            tf_play(ln, MyDir&vox_name&".VOC");
-#        endif
-#        if (tf_stat4(ln)<>0)
-#            tf_getdigits(ln,1,0,0);
-#            voslogln(ln," 按下"&tf_digits(ln)&"退出语音播放");
-#            return ;
-#        endif
-#        sleep(5);
-#    endwhile
-#endfunc
-#--------------------------------------------------------
 func Nplay(vox_name)
     #可以考虑根据扩展名来进行播放
     return IplayX(vox_name,TF_FMT_ALAW,DISABLE);
