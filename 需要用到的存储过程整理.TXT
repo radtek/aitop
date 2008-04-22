@@ -66,13 +66,13 @@ begin
  rollback tran    
  return    
 end    
-delete zhaozhong.tflog where st<@Time and st<convert(varchar(10),@st,120)      
+delete tflog where st<@Time and st<convert(varchar(10),@st,120)      
 commit tran  
   
 GO  
 
   
-CREATE  PROCEDURE [zhaozhong].tf_log   
+CREATE  PROCEDURE tf_log   
 @calltype int,  
 @caller varchar(20),  
 @callee varchar(20),  
