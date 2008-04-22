@@ -4,11 +4,11 @@ func voslogln(logstr)
 endfunc
 #--------------------------------------------------------
 func MyMsgPut(line,mesg)
-    if(AllowReload)
-        return msg_put(get_line2id(line),mesg);
-    else
+#    if(AllowReload)
+#        return msg_put(get_line2id(line),mesg);
+#    else
         return msg_put(line,mesg);
-    endif
+#    endif
 endfunc
 #--------------------------------------------------------
 func msgget()
