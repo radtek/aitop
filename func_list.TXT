@@ -11,7 +11,6 @@ func WaitHangup(destr)
 func WaitKey(destr,sec) #等待按键，超过系统最长时间限制则挂断
 func LoopChkMsg(destr)#在循环中可以调用此函数检查消息
 func IsMobile(arg1) #判断是否是手机
-func GetOption(unm,op)
 func Record(recfile)
 func RecordEx(recfile,to)
 func MainTEST()

@@ -181,6 +181,24 @@ update t_line set stat=0,ctype=0,mno='',cle='',st=getdate(),[desc]='' where ln=@
 select 1  
 GO
 
+CREATE  PROCEDURE [dbo].ln_getfree  
+AS  
+SET TRANSACTION ISOLATION LEVEL REPEATABLE READ  
+--获取空闲线路  
+declare @ln int  
+begin tran  
+select top 1 @ln=ln from t_line with (rowlock,xlock) where stat=0 and enable=1 order by newid()  
+if @@rowcount =0  
+    begin   
+        set @ln=''  
+    end  
+else  
+    begin  
+        update t_line set stat=3 where @ln=ln  
+    end  
+select @ln  
+commit tran  
+GO
 
 CREATE PROCEDURE [dbo].[ActCreateTflog] AS  
 declare @tflog nvarchar(1000)  
