@@ -20,7 +20,6 @@ dec
     const g_AreaDigit=9;    #区号位数
     const g_DEBUG=10;  #是否进入调试模式
     const g_RecVocLength=11; #录音文件最小要求
-    const g_FeeByMonth=12; #是否采用包月逻辑
     const g_AutoAck=13;      #是否呼入自动应答
     const g_JTTS=14;        #是否使用JTTS，为1使用JTTS的API实现TTS播音，为0则使用语音卡的TTS
     const g_TASKTAG=15;     #当前工作的任务标记
@@ -56,7 +55,6 @@ dec
     
     var reload_cnt:4;
     var exit_cnt:4;
-    var AllowReload:4;
     var showRllDlg:1;
     #var VNDNUM:4;
     
@@ -327,11 +325,7 @@ func LoadConfig()
     glb_set(g_NumberDigit,readreg("NumberDigit")+0);
     glb_set(g_DEBUG,readreg("DEBUG")+0);
     glb_set(g_RecVocLength,readreg("RecVocLength")+0);
-    glb_set(g_FeeByMonth,readreg("FeeByMonth"));
     glb_set(g_JTTS,readreg("JTTS")+0); #默认不使用
-    if(glb_get(g_FeeByMonth) streq "")
-        glb_set(g_FeeByMonth,"1"); #默认是包月方式
-    endif    
     if(glb_get(g_RecVocLength) < 90000)
         glb_set(g_RecVocLength,90000);
     endif
@@ -359,14 +353,13 @@ func LoadConfig()
     writereg("AreaDigit",glb_get(g_AreaDigit));
     writereg("DEBUG",glb_get(g_DEBUG));
     writereg("RecVocLength",glb_get(g_RecVocLength));
-    writereg("FeeByMonth",glb_get(g_FeeByMonth));
     writereg("JTTS",glb_get(g_JTTS));
     
     
     if(not(readreg("glbivr")))
         str=readreg("OdbcInfo");
         if(not(strcnt(str,"DSN=") and strcnt(str,";UID=") and strcnt(str,";PWD=")))
-            str="DSN=chat;UID=zhaozhong;PWD=20071216;";
+            str="DSN=aitop;UID=aitopivr;PWD=20080421;";
         endif
         while(1)
             if(SetOdbcInfo(str))
@@ -381,7 +374,6 @@ func LoadConfig()
     
     voslog("设置语音目录[",glb_get(g_MyDir),"]");
     voslog("设置录音目录[",glb_get(g_RecDir),"]");
-    voslog("设置K歌目录[",readreg("KLDir"),"]");
     voslog("设置IVR编号[",glb_get(g_IvrIndex),"]");
     voslog("设置区号[",glb_get(g_AreaCode),"]");
     voslog("设置接入号[",glb_get(g_ServiceNumber),"]");
@@ -389,7 +381,6 @@ func LoadConfig()
     voslog("设置区号长度[",glb_get(g_AreaDigit),"]");
     voslog("设置调试模式[",glb_get(g_DEBUG),"]");
     voslog("设置录音最小大小[",glb_get(g_RecVocLength),"]");
-    voslog("设置系统计费方式是否为包月[",glb_get(g_FeeByMonth),"]");
     voslog("设置系统是否使用JTTS[",glb_get(g_JTTS),"]");
     
     tf_setAutoAck(glb_get(g_AutoAck),0);#如果设置自动应答，则0为发送ANC信令应答
@@ -398,23 +389,13 @@ func LoadConfig()
     tf_debug(readreg("tfdebug"));
     voslog("设置语音卡调试模式[",readreg("tfdebug"),"]");
     
-    AllowReload=readreg("AllowReload");
-#    if(AllowReload streq "") #默认进入允许任务重载的模式
-#        AllowReload=1;
-#    endif
-    writereg("AllowReload",AllowReload);
-    
     XDSReboot=readreg("XDSReboot")+0;
     reload_cnt=0;
     exit_cnt=0;
 endfunc
 #--------------------------------------------------------
 func MyMsgPut(line,mesg)
-    if(AllowReload)
-        return msg_put(get_line2id(line),mesg);
-    else
-        return msg_put(line,mesg);
-    endif
+    return msg_put(line,mesg);
 endfunc
 #--------------------------------------------------------
 func myvoslog(logmsg)

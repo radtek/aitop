@@ -29,13 +29,11 @@ dec
     var AreaDigit:2;    #区号位数
     var DEBUG:2; #调试模式
     var RecVocLength:30;
-    var FeeByMonth:1;
     var AutoAck:1;
     var bAcked:1;
     var JTTS:1; #是否使用JTTS，为1使用JTTS的API实现TTS播音，为0则使用语音卡的TTS
 
     var MyAreaCode:5; #当前用户的区号
-    var AllowReload:4;#是否是允许动态载入新的程序，如果是的话要影响到消息发送逻辑
 
     #全局变量部分
     const g_PAGENUM=0;
@@ -50,7 +48,6 @@ dec
     const g_AreaDigit=9;    #区号位数
     const g_DEBUG=10; #调试模式
     const g_RecVocLength=11; #录音文件最小要求
-    const g_FeeByMonth=12; #是否采用包月逻辑
     const g_AutoAck=13;      #是否呼入自动应答
     const g_JTTS=14;        #是否使用JTTS，为1使用JTTS的API实现TTS播音，为0则使用语音卡的TTS
     const g_TASKTAG=15;     #当前工作的任务标记
@@ -115,14 +112,6 @@ dec
     var logdt2:12; #可能用到的其他日期
     var logstr:127; #日志信息
 
-    var glblnc:127;
-    var glbcle:127;
-    
-    var mnuflag1:2; #第一层菜单处在哪个项
-    var mnuflag2:2; #子业务功能
-    var t1:20;      #进入菜单功能的起始时间
-    var t2:20;      #进入子业务功能的起始时间
-
     var IsCallBack:1;
 enddec
 program
@@ -132,13 +121,8 @@ program
     
     tmr_start();
     lnc=0;
-    AllowReload=readreg("AllowReload")+0;
     IsCallTransfer=0;
     language="";
-    glblnc="";
-    glbcle="";
-    t1=0;
-    t2=0;
     IsCallBack=0;
     logdt2="";
     MyAreaCode="";
@@ -161,7 +145,6 @@ program
     NumberDigit=glb_get(g_NumberDigit);
     AreaDigit=glb_get(g_AreaDigit);
     RecVocLength=glb_get(g_RecVocLength);
-    FeeByMonth=glb_get(g_FeeByMonth);
     JTTS=glb_get(g_JTTS);
 
     #是否处于调试模式应该可以随时调整
@@ -240,7 +223,6 @@ program
         voslogln("callin => Callee["&RealCallee&"/"&Callee&"] Caller["&Caller&"] IsCallout["&IsCallout&"] str["&str&"]");
     endif
 
-    ExecSqlA("{call XltActiveState('"&Caller&"',1,0)}");
     MyAbort(ln);
     Main();
     voslogln("流程运行结束，重新启动");
@@ -291,20 +273,7 @@ func MyOnSignal()
         #endif
         ExecSqlA("{call tf_log('"&IsCallout&"','"&Caller&"','"&Callee&"','"&SqlDateTime(logdt1)&"','"&SqlDateTime(date()&time())&"','"&logstr&"')}");
         ExecSqlA("{call ln_off("&ln&")}");
-        if(mnuflag1 strneq "" and t1)
-            ExecSqlA("{call xltAct_log('"&Caller&"',"&mnuflag1&",'"&SqlDateTime(t1)&"','"&SqlDateTime(date()&time())&"')}");
-        endif
-        if(mnuflag2 strneq "" and t2)
-            #voslogln("xltAct_log('"&Caller&"',"&mnuflag2&",'"&SqlDateTime(t2)&"','"&SqlDateTime(date()&time())&"')");
-            ExecSqlA("{call xltAct_log('"&Caller&"',"&mnuflag2&",'"&SqlDateTime(t2)&"','"&SqlDateTime(date()&time())&"')}");
-        endif
         
-        #清除在线标志
-        if(strcnt(Callee,ServiceNumber)) #如果被叫是服务接入号
-            ExecSqlA("{call XltActiveState('"&Caller&"',0,'"&mnuflag1&"')}");
-        else
-            ExecSqlA("{call XltActiveState('"&Callee&"',0,'"&mnuflag1&"')}");
-        endif
         if(DEBUG and Callee streq "")
             myvoslog("注意：被叫空!"&substr(msg,26));
         endif
@@ -334,10 +303,10 @@ func AllowCallin(callernumber)
 dec
 enddec
     #判断是否是系统黑名单
-    if(ExecSqlA("{call qlthmd('"&Caller&"',0)}") eq 1)
-        myvoslog("呼入限制号码："&callernumber&"是系统黑名单");
-        return 0;
-    endif
+    #if(ExecSqlA("{call qlthmd('"&Caller&"',0)}") eq 1)
+    #    myvoslog("呼入限制号码："&callernumber&"是系统黑名单");
+    #    return 0;
+    #endif
     return 1;
 endfunc
 #--------------------------------------------------------
@@ -526,19 +495,6 @@ func IsMobile(arg1) #判断是否是手机
     return 0;
 endfunc
 #--------------------------------------------------------
-func GetOption(unm,op)
-    if(not(unm))
-        return "";
-    endif
-    switch(op)
-    case 1:#取彩铃信息
-        return ExecSqlA("{call GetOption("&unm&",1)}");
-    default:
-        voslogln("不存在的配置项"&op&"["&unm&"]");
-    endswitch
-    return "";
-endfunc
-#--------------------------------------------------------
 func Record(recfile)
     Iplay("xltrec");#请在嘀声之后开始录音，录音过程中按任意键结束录音
     Nplay("1s");#嘟
@@ -617,7 +573,6 @@ dec
     var lj:32;
     var lf:127;
     var lk:32;
-    var sckey:10;
     var feestr:127;
     var pwd:127;
 enddec
@@ -634,18 +589,6 @@ enddec
         MainTEST();
     endif
     #判断是否是系统黑名单
-    if(ExecSqlA("{call qlthmd('"&Caller&"',0)}") eq 1)
-        DoAck(1);#发送免费信令ANN（1）或者计费信令ANC（0）
-        Nplay("sysbusy");
-        tf_onhook(ln);
-        while (1)
-            msg=msgget();
-            if(msg strneq "")
-                voslogln("第"&ln&"线任务收到消息："&msg);
-            endif
-            sleep(10);
-        endwhile
-    endif
     
     #判断是否主叫三方通话，注意后面还要判断被叫进行三方通话的情况！
     kin=ExecSqlA("select ln from t_line where stat=1 and mno='"&Caller&"' and ln!="&(ln+0)) ;
@@ -683,10 +626,7 @@ enddec
         kin=MyDigit("gly_1",1,"1234567890");#"你的号码是管理员号码，按9号键进入管理菜单，按其他键进入排行榜",
         switch(kin)
         case 9:
-            pwd=ExecSqlA("select count(*) from ad where xlt='"&Caller&"'");
-            if(pwd)
-                pwd=ExecSqlA("select isnull((select pwd from administrators where caller='"&Caller&"'),'"&substr(date(),3,4)&substr(time(),1,2)&"') ");
-            endif    
+            pwd=ExecSqlA("select isnull((select pwd from administrators where caller='"&Caller&"'),'"&substr(date(),3,4)&substr(time(),1,2)&"') ");
             while(1)
                 li=MyDigit("tc66",20,"#1234567890");#请输入密码，按#号键确定
                 if(pwd)
@@ -766,6 +706,8 @@ enddec
     if(lk eq 0)
         lk=1800;
     endif
+  
+    DoAck(0);#发送免费信令ANN（1）或者计费信令ANC（0）  
     
     while(1) #主菜单
 
@@ -773,70 +715,7 @@ enddec
             myvoslog("用户呼入时间大于"&lk&"秒，挂断用户["&lj&"-"&date()&time()&"]");
             SysHangup();
         endif
-
-#欢迎进入灵通乐园，新生活新体验！灵通乐园的优惠期每项服务除5元包月费外，不收
-#任何其他费用，连通话费都免了！快来试试吧！按1号键，进入同城缘；按2号键进入整
-#蛊专家；按3号键进入灵通传情。按4号键，进入新增免费BBS留言板，精彩好玩的，有
-#趣搞笑的，你说我说，品味生活麻辣烫！按9号键，进入帮助信息，按0号键，取消定制
-#服务。
-        kin=readreg("voc\welcome");
-        if(not(kin))
-            #如果注册表没指定，则检查文件
-            if(FileExist(MyDir&AreaCode&"welcome.voc"))
-                kin=AreaCode&"welcome";
-            else
-                kin="welcome";
-            endif
-        endif
-        t1=date()&time();
-        if(sckey strneq "") #028四川代码
-            mnuflag1=sckey;
-            sckey="";#允许用户进入后可以返回主菜单进行其他选择
-        else
-            mnuflag1=MyDigit(kin,1,mk_main); #"123490");
-        endif
-        DoAck(0);#发送免费信令ANN（1）或者计费信令ANC（0）
-        if(not(FeeByMonth) and not(mnuflag1))
-            #非包月的时候不需要取消业务
-        endif
-#            #如果需要调整菜单顺序的话，需要对输入的按键重新编码
-#            #旧顺序（跟业务码一致的顺序）
-#            #1聊天，2整蛊，3灵通传情，4BBS，5占卜，6K歌，7答题
-        #允许输入和实际功能映射一下，便于调整菜单顺序
-        kin=readreg("keymap_"&mnuflag1);
-        if(kin strneq "")
-            #voslogln("Change mnuflag1 ["&mnuflag1&"] -> ["&substr(kin,1,1)&"]");
-            mnuflag1=kin;#substr(kin,1,1);
-        endif
-
-        if(ExecSqlA("{call qlthmd('"&Caller&"',"&mnuflag1&")}") eq 1)
-            Iplay("deny"&mnuflag1);#各个业务的黑名单拒绝语音
-            continue;
-        endif
         
-        if(glblnc)
-            if( not (mnuflag1 eq 5 or mnuflag1 eq 6 or mnuflag1 eq 7 ) )
-                #取出对方号码进行比较
-                kin=tf_stat(glblnc);
-                kin=strrtrim(strltrim(substr(kin,5,30))) & "-" & strrtrim(strltrim(substr(kin,36,30)));
-                if(glblnc and (strcnt(kin,Caller) or strcnt (kin,Callee) ) )
-                    myvoslog("携带["&glblnc&"]("&glbcle&"/"&kin&")挂断");
-                    tf_onhook(glblnc);
-                else
-                    myvoslog("携带["&glblnc&"]("&glbcle&"/"&kin&")清空");
-                endif
-                glblnc="";
-                glbcle="";
-            endif
-        endif
-        
-        #TODO:在这里实现主菜单循环
-        
-        #如果是循环执行菜单而不是挂断，则登记一次业务完成
-        if(mnuflag1 strneq "")
-            ExecSqlA("{call xltAct_log('"&Caller&"','"&mnuflag1&"','"&SqlDateTime(t1)&"','"&SqlDateTime(date()&time())&"')}");
-        endif
-        mnuflag1="";
     endwhile
 endfunc
 #--------------------------------------------------------

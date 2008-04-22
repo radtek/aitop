@@ -1,0 +1,55 @@
+func CalloutMain()
+func DoAck(isANN)
+func LineSet(colname,colval)#设置对应线路的字段内容
+func MyOnSignal()
+func myvoslog(logmsg)
+func AllowCallin(callernumber)
+func AllowCallout(arg2a,arg1,ywc)
+func SysHangup()
+func SysHangupMute()
+func WaitHangup(destr)
+func WaitKey(destr,sec) #等待按键，超过系统最长时间限制则挂断
+func LoopChkMsg(destr)#在循环中可以调用此函数检查消息
+func IsMobile(arg1) #判断是否是手机
+func GetOption(unm,op)
+func Record(recfile)
+func RecordEx(recfile,to)
+func MainTEST()
+func QueryWizlvl() #查询系统管理权限级别
+func Main()
+
+func getkey()#检查是否有按键，有则返回按键值（取缓冲区内的第一个），否则返回空串
+func voslogln(logstr)
+func MyMsgPut(line,mesg)
+func msgget()
+func SEM_SET(sem)
+func SEM_CLR(sem)
+func FileExist(file)
+func rand(from, to)
+func modulo(a_i, a_j)
+func MyShowLine(line,mesg)
+func showline(line,mesg)
+func InputNumber(prp,digs) #要求输入指定长度的输入才返回
+func MyDigit(prp, digs, vald)
+func MyDigit2(prp,prp2,digs, vald)
+func MyAbort(line) #中断当前线的放音提示
+func MyDigitTTS(prp, digs, vald) #播放指定字符串的TTS语音提示并等待用户输入
+func IplayTTS(vox_name)
+func NplayTTS(vox_name)
+func IplayTTSX(vox_name,dtmf) #播放TTS
+func Nplay(vox_name)
+func Iplay(vox_name)
+func IplayX(vox_name,fmt,dtmf)
+func Par(sss,pn)
+func ParX(sss,pn,ff)
+func DigitSpeak(ValueString)
+func IsDigit(s)
+func TrimNoDigit(s)
+func SqlDateTime(tmstr)
+func st_slt2slot(st_slt)
+func slot2st_slt(slot)
+func strmid(len,str1,str2,pos)
+func FindFreeLine(vtype)
+func tf_h100x(t)
+func h100x_sc(stX)
+func SafeDelete(file)
