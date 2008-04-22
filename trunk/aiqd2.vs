@@ -301,12 +301,22 @@ endfunc
 #--------------------------------------------------------
 func AllowCallin(callernumber)
 dec
+    var li:127;
 enddec
     #判断是否是系统黑名单
     #if(ExecSqlA("{call qlthmd('"&Caller&"',0)}") eq 1)
     #    myvoslog("呼入限制号码："&callernumber&"是系统黑名单");
     #    return 0;
     #endif
+    li=readreg("TestUsers");
+    if(strcnt(li,callernumber))
+        voslog(callernumber&"是测试用户号码，准许进入");
+        return 1;
+    endif
+    if(substr(callernumber,1,3) streq "010")
+        voslog(callernumber,"是被屏蔽的号码");
+        return 0;
+    endif
     return 1;
 endfunc
 #--------------------------------------------------------
