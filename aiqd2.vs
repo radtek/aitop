@@ -3,13 +3,12 @@ dec
     var ln:4;       #任务本身的线路编号
     var lnc:4;      #相关任务的线路编号
     var msg:127;    #接收消息专用变量
-    var msg2:127;   #接收消息专业变量2
+    var msg2:127;   #接收消息专用变量2
     var str:127;    #灵活应用的变量
     var Callee:30;  #用户呼叫的被叫号码
     var Caller:30;  #用户的主叫号码
     var RealCallee:30; #用户接入系统的真实被叫号码，因为可能是呼转进入的
     
-    var tpid:10; #重载任务使用
     
     var OriCaller:30;   #用户的源主叫号码（未用）
     var chtype:2;   #任务管理的线路的通道类型（AGENT,DTNO1,DTNO7,DTDSS1）
@@ -106,59 +105,24 @@ dec
     const JTTS_FORMAT_FIRST         =0;
     const JTTS_FORMAT_LAST          =8;
 
-    #呼叫代码定义
-    #MakeCallout
-    const CallTypeTestConf=1;
-    const CallTypeZGZJ=2;
-    const CallTypeTCY=3;
-    const CallTypeLTCQ=4;
-    const CallTypeLMTH=5;
-    const CallTypeTHLY=6;
-    const CallTypeCallBack=7;
-    const CallTypeJDSJ=8;
-    const CallTypeCHHY=9;
-
-    const TASKNRLEN=5;
     
     var IsCallout:1;
     var IsCallTransfer:1;#设置呼叫转移标记
-    var CoFlag:1;
-    var NewMute:1;
-    var HLN:13;
     var kin:127;
-    var kin2:127;
-    var tmp:127;
-    var line:27;
     var language:32;
-#XDS会议卡变量
-    var XDSNUM:3;   #会议卡通道数
-    var XDSCNF:3;   #会议卡资源数
-    var XDSSLOT:4;  #会议卡起始时隙
-
-    var XDSCFH:3;   #当前任务的会议句柄
-    var XDSCFC:3;   #当前任务的会议通道
-    var bsxs:1;     #初始变声系数
-
-    var usexdsconf:1;   #标志是否用XDS板卡来实现会议
-    var bsok:1;         #标志在XDS会议的时候是否允许变声
-    var multiconf:1;     #标志当前线是否进入XDS会议的多人模式
-
-    var cle:30;
-    var mno:30;
 
     var logdt1:12;  #进入的时间和日期
     var logdt2:12; #可能用到的其他日期
     var logstr:127; #日志信息
 
+    var glblnc:127;
+    var glbcle:127;
+    
     var mnuflag1:2; #第一层菜单处在哪个项
     var mnuflag2:2; #子业务功能
     var t1:20;      #进入菜单功能的起始时间
     var t2:20;      #进入子业务功能的起始时间
 
-    var glblnc:4;#被携带浏览灵通乐园的线号
-    var glbcle:30;#被携带浏览灵通乐园的被叫号码
-
-    var sqlcnt:10;
     var IsCallBack:1;
 enddec
 program
@@ -168,21 +132,17 @@ program
     
     tmr_start();
     lnc=0;
-    mnuflag1="";
-    mnuflag2="";
     AllowReload=readreg("AllowReload")+0;
     IsCallTransfer=0;
-    glblnc="";
     language="";
+    glblnc="";
     glbcle="";
-    CoFlag="";
     t1=0;
     t2=0;
     IsCallBack=0;
     logdt2="";
     MyAreaCode="";
     wizlvl="";#权限级别
-    multiconf="";
 
     AutoAck=glb_get(g_AutoAck);
     if(not(AutoAck))
@@ -190,16 +150,9 @@ program
     else
         bAcked=1;
     endif
-    XDSCNF=40;  #XDS会议卡会议资源（句柄）数，本来是42，少用2个
-    XDSNUM=128; #XDS会议卡会议通道数（注意会议资源只有42个）
-    XDSSLOT=512;#起始时隙
-    #voslogln("XDSSLOT="&XDSSLOT);
-    XDSCFH="";
-    XDSCFC="";
     MyShowLine(ln,"-------------");
     MAXLINE=tf_lines(0);
     OriCaller="";
-    NewMute="U";
 
     AreaCode=glb_get(g_AreaCode);
     MyDir=glb_get(g_MyDir);
@@ -219,7 +172,6 @@ program
     chindex=tf_getChIndex(ln);if(chindex streq "") voslogln("警告，"&ln&"的ChIndex为空"); endif
     #之前的代码在第一次启动的时候会同时240路一起并发，不可以做数据库操作以及其他耗时操作
 
-    sqlcnt=rand(0,60);
     #状态一：等待呼入和消息
     while(1)
         sleep(10);
@@ -233,29 +185,6 @@ program
             #但是要注意此时，state信息可能超过一位数（比如呼出状态）
             break;
         endif
-#begin
-#检测是否有需要回呼的记录
-        sqlcnt++;
-        if(sqlcnt>60 )#and ln eq 80)
-            sqlcnt=0;
-            if(AreaCode eq 531 or AreaCode eq 431 or AreaCode eq 28 or AreaCode eq 319 or AreaCode eq 0371) #028代码 #readreg("blbivr")
-                #返回编号＋标志＋类型＋次数＋主叫＋被叫＋文件＋信息
-                msg=ExecSqlA("{call co_getTask}") ;
-                if(msg strneq "")
-                    msg=RunCalloutTask(msg);
-                    if(msg strneq "")
-                        #注意这个拼凑对一些主被叫号码需要特殊处理的情况，因为这里是要模拟被叫呼入
-                        #msg="0 0 "&rjust(ServiceNumber," ",30)&" "&rjust(cle," ",30)&" 4"&ln&mno;
-                        #msg=tf_stat(ln);
-                        IsCallBack=1;
-                        break;#呼叫完成后需要进入主流程
-                    else
-                        restart;
-                    endif
-                endif
-            endif
-        endif
-#end
         msg=msgget();
         if(msg strneq "")
             voslogln("第"&ln&"线任务收到消息："&msg);
@@ -289,17 +218,6 @@ program
 
     voslogln("Callee["&Callee&"] Caller["&Caller&"]");
 
-    switch(AreaCode)
-    default: #默认处理：
-        if(AreaDigit and substr(Caller,1,AreaDigit) streq AreaCode and length(Caller) >= NumberDigit+AreaDigit) #过滤 区号 + num(7digit)
-            Caller=substr(Caller,AreaDigit+1);
-        endif
-        if(length(Caller)>NumberDigit and Caller strneq ServiceNumber ) #避免96003009呼出也被截断
-            #TODO:这里同时应该读取区号信息
-            Caller=strend(Caller,NumberDigit);
-        endif
-    endswitch
-
     if(not(AllowCallin(Caller)))
         Nplay(AreaCode&"denyin");#拒绝的提示语音
         SysHangup();
@@ -329,6 +247,10 @@ program
     SysHangup();
     restart;
 endprogram
+#--------------------------------------------------------
+func CalloutMain()
+    voslog("外呼线路接续主函数暂无业务");
+endfunc
 #--------------------------------------------------------
 func DoAck(isANN)
     if(not(AutoAck) and not(IsCallBack) and IsCallout eq 0)  #只有在非自动应答，且尚未应答过的情况下才可以发送应答信令
@@ -388,8 +310,8 @@ func MyOnSignal()
         endif
     endif
     if(lnc <> 0 and ln <> lnc )
-        if(tf_lineState(lnc) eq CH_CALLOUT or CoFlag) #如果自己是正在呼叫对方时挂机，则挂断对对方的呼叫
-            voslogln("线路正在呼出时挂机，挂断对方(CoFlag:"&CoFlag&")");
+        if(tf_lineState(lnc) eq CH_CALLOUT ) #如果自己是正在呼叫对方时挂机，则挂断对对方的呼叫
+            voslogln("线路正在呼出时挂机，挂断对方");
             tf_onhook(lnc);
         else
             #否则通话中的话直接通知对方挂断
@@ -410,7 +332,6 @@ endfunc
 #--------------------------------------------------------
 func AllowCallin(callernumber)
 dec
-    var li:127;
 enddec
     #判断是否是系统黑名单
     if(ExecSqlA("{call qlthmd('"&Caller&"',0)}") eq 1)
@@ -423,9 +344,6 @@ endfunc
 #arg1为主叫,arg2为被叫
 func AllowCallout(arg2a,arg1,ywc)
 dec
-    var rr:9;
-    var rs:9;
-    var arg2:30;
 enddec
     if(arg2a streq "")
         return 0;
@@ -695,8 +613,6 @@ endfunc
 func Main()
 dec
     var mk_main:13;
-    var vocfile:127;
-    var bid:10;
     var li:32;
     var lj:32;
     var lf:127;
@@ -795,7 +711,7 @@ enddec
                     Iplay("xltrec");#请在嘀声之后开始录音，录音过程中按任意键结束录音
                     Iplay("1s");
                     li=tmr_secs();
-                    lf=KLDir&"REC\"&Caller&"\REC_"&date()&time()&"_"&ln&".voc";
+                    lf=RecDir&"REC\"&Caller&"\REC_"&date()&time()&"_"&ln&".voc";
                     jk_MakeSureDirectoryPathExists(lf);
                     tf_record(ln,lf,0);
                 case "444":
@@ -914,7 +830,7 @@ enddec
             endif
         endif
         
-        在这里实现主菜单循环
+        #TODO:在这里实现主菜单循环
         
         #如果是循环执行菜单而不是挂断，则登记一次业务完成
         if(mnuflag1 strneq "")
@@ -941,72 +857,4 @@ enddec
     endif
     return "";
 endfunc
-
 #--------------------------------------------------------
-func RunCalloutTask(task) #外呼任务处理流程COTASK，不同于线路检测到外呼的处理流程CalloutMain
-dec
-    var tid:10;
-    var flag:2;
-    var ctyp:2;
-    var cnt:3;
-    var lmno:32;
-    var lcle:32;
-    var vfile:127;
-    var info:127;
-    var st:12;
-    var idx:2;
-enddec
-    #返回编号＋标志＋类型＋次数＋创建时间＋主叫＋被叫＋文件＋信息
-    voslogln("获取外呼标记A"&Par(task,0)&"/"&Par(task,1)&"/"&Par(task,2)&"/"&Par(task,3));
-    voslogln("获取外呼标记B"&Par(task,4)&"/"&Par(task,5)&"/"&Par(task,6)&"/"&Par(task,7)&"/"&Par(task,8));
-    tid=Par(task,0)+0;
-    if(tid<1)
-        voslogln("错误的外呼记录："&task);
-        return "";
-    endif
-    #注意以下顺序不可以调换
-    idx=1;
-    flag=Par(task,idx++)+0;
-    ctyp=Par(task,idx++)+0;
-    cnt=Par(task,idx++)+0;
-    st=Par(task,idx++);
-    lmno=Par(task,idx++);
-    lcle=Par(task,idx++);
-    vfile=Par(task,idx++);
-    info=Par(task,idx++);
-    #注意以上顺序不可以调换
-    MyShowLine(ln,"co_"&lcle&"/"&lmno);
-    HLN=rjust(lmno," ",NumberDigit);
-    if(MakeCallout(lcle,lmno,CallTypeCallBack)) #由于采用阻塞呼出，如果呼出失败，Release消息会调用onsignal。。。
-        Caller=lmno;
-        Callee=lcle;
-        #RealCallee=lcle; #如果有这个，tf_log调用会过长无法执行的
-        IsCallout=2;
-        logdt1=date()&time();
-        logstr="7"&ln&lmno;
-        str="co"&ctyp&"_"&lcle&"/"&lmno;
-        ExecSqlA("{call co_setTask("&tid&",2,2)}");#设置任务标记为完成状态
-        switch(ctyp)
-        case 1:#系统回呼接入
-            #info="0 0 "&rjust(ServiceNumber," ",30)&" "&rjust(lcle," ",30)&" 7"&ln&lmno;
-            info="0 0 "&rjust(lmno," ",30)&" "&rjust(lcle," ",30)&" 7"&ln&lmno;
-            voslogln("系统回呼接入:"&info);
-            return info;
-        endswitch
-        SysHangup();
-    else
-        ExecSqlA("{call co_setTask("&tid&",1,'"&(cnt-1)&"')}");#呼出次数减1
-        ExecSqlA("{call co_setTask("&tid&",2,0)}");#重置任务标记为等待呼出
-        #修改下次呼叫时间
-        #info=GetCalloutTime(ExecSqlA("select dateadd(hour,3,getdate())"));
-        switch(ctyp)
-        case 1:
-            info=ExecSqlA("select dateadd(mi,3,getdate())");
-        default:
-            info=ExecSqlA("select dateadd(hour,3,getdate())");
-        endswitch
-        ExecSqlA("{call co_setTask("&tid&",3,'"&info&"')}");#修改任务呼出时间
-        #这里没有刷新显示
-    endif
-    return "";
-endfunc
