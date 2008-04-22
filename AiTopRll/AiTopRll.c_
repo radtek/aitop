@@ -1,0 +1,17 @@
+// AiTopRll.c_ created by MKNTRLL Tue Apr 22 23:34:06 2008
+#include <windows.h>
+#include "ntrll.h"
+
+t_func vosStart(int argc, char *argv[])
+	{
+// TODO: Replace code below by your function code
+	voslog("RLL function vosStart called");
+	return "ReturnValue";
+	}
+
+t_func vosExit(int argc, char *argv[])
+	{
+// TODO: Replace code below by your function code
+	voslog("RLL function vosExit called");
+	return "ReturnValue";
+	}
