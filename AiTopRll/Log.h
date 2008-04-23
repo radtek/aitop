@@ -9,6 +9,8 @@
 #if !defined(AFX_LOG_H__DBCE8A5E_7BD0_4A9B_AEE9_B5DFEC4FFC55__INCLUDED_)
 #define AFX_LOG_H__DBCE8A5E_7BD0_4A9B_AEE9_B5DFEC4FFC55__INCLUDED_
 #include "io.h"
+#include <time.h>
+#include <stdio.h>
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000

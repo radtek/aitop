@@ -23,7 +23,7 @@ static char THIS_FILE[]=__FILE__;
 bool CLog::FileExist(char * filename)
 {
 	struct _finddata_t ff;
-	intptr_t hd;
+	long hd;
 	hd=_findfirst(filename,&ff);
 	if(hd==-1)
 		return FALSE;
