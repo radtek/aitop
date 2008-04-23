@@ -1,8 +1,10 @@
+#include "StdAfx.h"
 #include <windows.h>
 #include "MTNLIB.h"
 #include "ntrll.h"
-
-CLog g_log(NULL);
+#include "AiTopRll_main.h"
+// 
+// CLog g_log(NULL);
 
 t_func vosStart(int argc, char *argv[])
 {
