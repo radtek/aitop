@@ -1,5 +1,6 @@
-# RLL definition file for MFCRLL.DLL
-
 vosStart,s
 vosExit,x
 #默认在当前目录下的log目录里写日志文件
+#检查传入的号码是否是黑名单
+ai_isBlackList,1
+ai_getProvince,1
