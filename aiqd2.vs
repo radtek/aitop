@@ -511,16 +511,13 @@ endfunc
 #--------------------------------------------------------
 func Main()
 dec
-    var mk_main:13;
     var li:32;
     var lj:32;
     var lf:127;
     var lk:32;
-    var feestr:127;
     var pwd:127;
 enddec
     
-    feestr="";
 
     if(readreg("language")) #语言种类区分设置
         #voslogln("设置语音优先目录为"&MyAreaCode);

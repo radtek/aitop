@@ -36,19 +36,68 @@ GO
 
 CREATE TABLE [dbo].[aimenu] (
 	[idx] [int] IDENTITY (1, 1) NOT NULL ,
-	[menukey] [char] (10) COLLATE Chinese_PRC_CI_AS NOT NULL ,
-	[menutype] [char] (10) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[menukey] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[menutype] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[strVOC] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
 	[strTTS] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
 	[strVX] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL 
 ) ON [PRIMARY]
 GO
 
+CREATE TABLE [dbo].[XltVosLog] (
+	[ID] [bigint] IDENTITY (1, 1) NOT NULL ,
+	[LineID] [int] NULL ,
+	[Caller] [varchar] (32) COLLATE Chinese_PRC_CI_AS NULL ,
+	[Callee] [varchar] (32) COLLATE Chinese_PRC_CI_AS NULL ,
+	[Logstr] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	[dt] [datetime] NULL CONSTRAINT [DF_XltVoiceLog_dt] DEFAULT (getdate())
+) ON [PRIMARY]
+GO
+
+
+
 CREATE  PROCEDURE [dbo].mnu_getType
 @mnuKey varchar(127)
 AS
-    select isnull(
+    select isnull((select upper(menuType) from aimenu where menuKey=@mnuKey),'')
 GO
+
+CREATE  PROCEDURE [dbo].mnu_getString
+@mnuKey varchar(127),
+@mnuType varchar(127)
+AS
+    if upper(@mnuType) = 'VOC'
+        select isnull((select strVOC from aimenu where menuKey=@mnuKey),'')
+    if upper(@mnuType) = 'TTS'
+        select isnull((select strTTS from aimenu where menuKey=@mnuKey),'')
+    if upper(@mnuType) = 'VX'
+        select isnull((select strVX from aimenu where menuKey=@mnuKey),'')
+GO
+
+CREATE  PROCEDURE [dbo].mnu_getKeyList
+@mnuKey varchar(127)
+AS
+declare @nLen int
+declare @ret varchar(127)
+declare @key char(1)
+set @nLen=len(@mnuKey)
+set @ret=''
+declare mycur cursor for select distinct(substring(menuKey,@nLen+1,1)) from aimenu where menuKey!=@mnuKey and left(menukey,@nLen)=@mnuKey
+open mycur
+FETCH NEXT FROM mycur INTO @key
+WHILE @@FETCH_STATUS = 0
+BEGIN
+   set @ret=@ret+@key
+   -- This is executed as long as the previous fetch succeeds.
+   FETCH NEXT FROM mycur INTO @key
+END
+
+CLOSE mycur
+DEALLOCATE mycur
+
+select @ret
+GO
+
 
 CREATE  PROCEDURE [dbo].xlt_init  
 AS 
@@ -133,6 +182,13 @@ AS
 --在某条线路上摘机  
 update t_line set stat=@stat,ctype=@ctype,mno=@mno,cle=@cle,st=getdate(),[desc]=@desc  where ln=@ln  
 select 1  
+GO
+
+CREATE  PROCEDURE [dbo].ln_timeout_check
+@ln int
+AS
+--检查某条线路是否超时，语音程序可以在检测到超时后挂断用户
+select isnull((select top 1 1 from t_line where ln=@ln and dateadd(mi,-30,getdate()) > st),0)
 GO
 
 CREATE  PROCEDURE [dbo].ln_off  
