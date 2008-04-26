@@ -63,6 +63,7 @@ dec
 enddec
 program
     glb_set(g_PAGENUM,0);
+    tmr_start();
     vid_clear();
     vid_scroll_area(21,0,80,3);
     showRllDlg=0;
@@ -129,7 +130,7 @@ program
             if (kb_getx() streq "011b")
                 exit_cnt++;
                 voslog("第"&exit_cnt&"按ESC");
-                if(exit_cnt>3)
+                if(exit_cnt>1)
                     myvoslog("按了ESC退出");
                     break;
                 endif 
@@ -415,19 +416,30 @@ dec
     var key:127;
 enddec
 #MyDir
-    if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
-        voslog(ln,"在线太长时间，挂断！");
-        SysHangup();
+#    if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+#        voslog(ln,"在线太长时间，挂断！");
+#        SysHangup();
+#    endif
+    voslog("menu_call("&menuKey&") is called!");
+    menuType=strrtrim(ExecSqlA("{call mnu_getType('"&menuKey&"')}"));
+    if(not(menuType))
+        voslog("错误的菜单KEY:"&menuKey);
+        voslog("menu_call("&menuKey&") is over!ERROR");
+        return 1;
     endif
-    menuType=ExecSqlA("{call mnu_getType('"&menuKey&"')}");
-    keyallow=ExecSqlA("{call mnu_getKeyList'"&menuKey&"')}");
-    menuString=ExecSqlA("{call mnu_getString('"&menuKey&"','"&menuType&"')}");
+    voslog("menuType="&menuType);
+    keyallow=strrtrim(ExecSqlA("{call mnu_getKeyList('"&menuKey&"')}"));
+    voslog("mnu_getKeyList="&keyallow);
+    menuString=strrtrim(ExecSqlA("{call mnu_getString('"&menuKey&"','"&menuType&"')}"));
+    voslog("menuString="&menuString);
     switch(menuType)
     case "TTS":
         key=MyDigitTTS(menuString,1,keyallow);
+        voslog("key="&key);
         return menu_call(menuKey&key);
     case "VOC":
         key=MyDigit(menuString,1,keyallow);
+        voslog("key="&key);
         return menu_call(menuKey&key);
     case "VX":#目前先不调用具体的外部程序，先调用内部实现函数
         voslog("调用"&menuString);
@@ -436,8 +448,10 @@ enddec
         else
             voslog("Unknow VX flow!");
         endif
+        voslog("menu_call("&menuKey&") is over!VX");
         return 0;
     endswitch
+    voslog("menu_call("&menuKey&") is over!NULL");
     return 1;
 endfunc
 #--------------------------------------------------------
@@ -454,7 +468,7 @@ endfunc
 #--------------------------------------------------------
 func MyDigitTTS(prp, digs, vald) #播放指定字符串的TTS语音提示并等待用户输入
 dec
-    var dig_string:15;
+    var ret:15;
     var l:1;
     var overcont:1;
     var li:127;
@@ -463,11 +477,13 @@ enddec
     overcont=0;
     li=tmr_secs();
     cnt=0;
+    ret="";#必须清除，如果不清除会保留上一次调用的值
 ReInput:
     voslog("TTS_PLAY:"&prp);
     while(1)
         if (kb_qsize()>0)
             l=kb_get();
+            voslog("按键"&l);
             if(not(strcnt(vald,l)))
                 voslog("输入按键非法["&vald&"]->"&l);
                 goto ReInput;
@@ -476,13 +492,14 @@ ReInput:
                 return "*";
             endif
             if(l streq "#" and substr(vald,1,1) streq "#")
-                return dig_string;
+                return ret;
             endif
-            dig_string+=l;
-            if(length(dig_string)>=digs)
-                return dig_string;
+            ret=ret&l;
+            if(length(ret)>=digs)
+                return ret;
             endif
         endif
+        sleep(10);
         if(tmr_secs() - li > 30)
             cnt++;
             if(cnt>2)
