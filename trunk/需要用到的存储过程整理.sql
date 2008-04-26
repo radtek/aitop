@@ -1,10 +1,5 @@
 
-CREATE  PROCEDURE [dbo].xlt_init  
-AS 
-    truncate table t_line
-GO
-
-CREATE TABLE [t_line] (
+CREATE TABLE [dbo].[t_line] (
 	[id] [int] IDENTITY (1, 1) NOT NULL ,
 	[ln] [int] NOT NULL ,
 	[enable] [int] NOT NULL CONSTRAINT [DF_t_line_enable] DEFAULT (1),
@@ -16,7 +11,7 @@ CREATE TABLE [t_line] (
 	[desc] [varchar] (50) COLLATE Chinese_PRC_CI_AS NOT NULL CONSTRAINT [DF__t_line__desc__7B663F43] DEFAULT ('')
 ) ON [PRIMARY]
 GO
-CREATE TABLE [t_tflog] (
+CREATE TABLE [dbo].[t_tflog] (
 	[id] [int] IDENTITY (1, 1) NOT NULL ,
 	[ln] [int] NOT NULL ,
 	[calltype] [int] NULL ,
@@ -28,7 +23,7 @@ CREATE TABLE [t_tflog] (
 ) ON [PRIMARY]
 GO
 
-CREATE TABLE [tflog] (
+CREATE TABLE [dbo].[tflog] (
 	[id] [int] IDENTITY (1, 1) NOT NULL ,
 	[calltype] [int] NULL ,
 	[caller] [varchar] (20) COLLATE Chinese_PRC_CI_AS NULL ,
@@ -39,7 +34,26 @@ CREATE TABLE [tflog] (
 ) ON [PRIMARY]
 GO
 
+CREATE TABLE [dbo].[aimenu] (
+	[idx] [int] IDENTITY (1, 1) NOT NULL ,
+	[menukey] [char] (10) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[menutype] [char] (10) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[strVOC] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	[strTTS] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	[strVX] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL 
+) ON [PRIMARY]
+GO
 
+CREATE  PROCEDURE [dbo].mnu_getType
+@mnuKey varchar(127)
+AS
+    select isnull(
+GO
+
+CREATE  PROCEDURE [dbo].xlt_init  
+AS 
+    truncate table t_line
+GO
 
 
   
@@ -72,7 +86,7 @@ commit tran
 GO  
 
   
-CREATE  PROCEDURE tf_log   
+CREATE  PROCEDURE [dbo].tf_log   
 @calltype int,  
 @caller varchar(20),  
 @callee varchar(20),  

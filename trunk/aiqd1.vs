@@ -174,6 +174,8 @@ program
                 i=kb_get();
                 voslog("press "&i);
                 switch(i)
+                case "m":
+                    menu_call("A");
                 case "a":
                     for (i=1;i<=MAXLINE;i++)
                         str=get_line2id(i);
@@ -401,4 +403,13 @@ endfunc
 func myvoslog(logmsg)
     voslog("0,0,0,"&logmsg);
     return ExecSqlA("{call VosLog(0,'0','0','"&glb_get(g_IvrIndex)&strstrip(logmsg,"'")&"')}");
+endfunc
+#--------------------------------------------------------
+func menu_call(menuKey)
+dec
+    var menuType:127;
+    var menuString:127;
+    var keyallow:127;
+enddec
+    
 endfunc

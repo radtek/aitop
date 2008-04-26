@@ -248,14 +248,6 @@ onsignal
     MyOnSignal();
 end
 #--------------------------------------------------------
-func LineSet(colname,colval)#设置对应线路的字段内容
-    switch(colname)
-    case "init":#初始化本线状态
-    case "create":#设置呼叫方向，业务代码，主叫号码，被叫号码，起始时间，返回记录编码
-    case "hangup":#挂机，设置结束时间
-    endswitch
-endfunc
-#--------------------------------------------------------
 func MyOnSignal()
     MyShowLine(ln,"onsignal");
     voslogln(" in onsignal");
@@ -505,65 +497,6 @@ func IsMobile(arg1) #判断是否是手机
     return 0;
 endfunc
 #--------------------------------------------------------
-func Record(recfile)
-    Iplay("xltrec");#请在嘀声之后开始录音，录音过程中按任意键结束录音
-    Nplay("1s");#嘟
-    MyShowLine(ln,"Rec:"&recfile);
-    if(FileExist(recfile) or FileExist(RecDir&recfile))
-        voslogln("目标录音文件已经存在，删除。。。");
-        SafeDelete(RecDir&recfile);
-    endif
-    #tf_unRoute(ln);
-    #tf_monitor(ln,ln);
-    tf_record(ln,recfile,250);#阻塞方式录音
-    if(FileExist(recfile) or FileExist(RecDir&recfile))
-        Nplay("xltplayrec");#请听你刚才的录音，任意键结束
-        if(FileExist(recfile))
-            tf_play(ln,recfile);
-        else
-            tf_play(ln,RecDir&recfile);
-        endif
-        #voslogln(RecDir&recfile);
-        return 1;
-    else
-        voslogln("录音文件不存在："&recfile&"["&RecDir&"]");
-        return 0;
-    endif
-endfunc
-#--------------------------------------------------------
-func RecordEx(recfile,to)
-dec
-    var RecordTimeratio:9;
-enddec
-    Iplay("xltrec");#请在嘀声之后开始录音，录音过程中按任意键结束录音
-    Nplay("1s");#嘟
-    MyShowLine(ln,"Rec:"&recfile);
-    if(FileExist(RecDir&recfile))
-        voslogln("目标录音文件已经存在，删除。。。");
-        SafeDelete(RecDir&recfile);
-    endif
-    #tf_unRoute(ln);
-    #tf_monitor(ln,ln);
-    RecordTimeratio=readreg("RecordTimeratio");
-    if(not(RecordTimeratio))
-        RecordTimeratio=1;
-    endif
-    RecordTimeratio=to/RecordTimeratio;
-    if(RecordTimeratio > 250)
-        RecordTimeratio =250;
-    endif
-    tf_record(ln,recfile,RecordTimeratio);#阻塞方式录音
-    if(FileExist(RecDir&recfile))
-        Nplay("xltplayrec");#请听你刚才的录音，任意键结束
-        tf_play(ln,RecDir&recfile);
-        voslogln(RecDir&recfile);
-        return 1;
-    else
-        voslogln("录音文件不存在："&RecDir&recfile);
-        return 0;
-    endif
-endfunc
-#--------------------------------------------------------
 func MainTEST()
     voslog("为固定的测试用户编写测试流程");
 endfunc
@@ -699,9 +632,7 @@ enddec
     endif
 
     #不应答就无法听到语音
-    DoAck(0);
-    
-    mk_main=readreg("mk_main");
+    DoAck(0);#发送免费信令ANN（1）或者计费信令ANC（0）      
     li=readreg("prewelcome");
     if(li and FileExist(MyDir&li&".voc"))
         Nplay(li); #如果存在欢迎语之前的语音文件，则播放之
@@ -717,7 +648,6 @@ enddec
         lk=1800;
     endif
   
-    DoAck(0);#发送免费信令ANN（1）或者计费信令ANC（0）  
     
     while(1) #主菜单
 
