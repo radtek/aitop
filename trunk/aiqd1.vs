@@ -59,6 +59,7 @@ dec
     #var VNDNUM:4;
     
     var XDSReboot:1;
+    
 enddec
 program
     glb_set(g_PAGENUM,0);
@@ -89,11 +90,12 @@ program
     MAXLINE=tf_lines(0);
     writereg("VosLoading",0);
     voslog("MAXLINE="&MAXLINE);
-    if(MAXLINE < 1)
+    if(MAXLINE < 1 and readreg("TESTPC") streq "")
         myvoslog("系统检测到MAXLINE为0，需要重新启动或者重新配置硬件");
         #jk_RebootSystem();
         while(1) sleep(1); endwhile
     endif
+    if(MAXLINE eq 0) MAXLINE=1; endif
     myvoslog("系统启动@"&date()&time());
     str=rjust(MAXLINE,0,4);
     for (i=0;i<=8;i+=2)
@@ -105,7 +107,7 @@ program
     endfor 
     
     #这个操作应该在各个线路被spawn之前操作
-    ExecSqlA("{call xlt_init}");#执行数据库初始化操作
+    ExecSqlB("{call xlt_init}");#执行数据库初始化操作
 
 
         for (i=1;i<=MAXLINE;i++)
@@ -410,6 +412,87 @@ dec
     var menuType:127;
     var menuString:127;
     var keyallow:127;
+    var key:127;
 enddec
+#MyDir
+    if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+        voslog(ln,"在线太长时间，挂断！");
+        SysHangup();
+    endif
+    menuType=ExecSqlA("{call mnu_getType('"&menuKey&"')}");
+    keyallow=ExecSqlA("{call mnu_getKeyList'"&menuKey&"')}");
+    menuString=ExecSqlA("{call mnu_getString('"&menuKey&"','"&menuType&"')}");
+    switch(menuType)
+    case "TTS":
+        key=MyDigitTTS(menuString,1,keyallow);
+        return menu_call(menuKey&key);
+    case "VOC":
+        key=MyDigit(menuString,1,keyallow);
+        return menu_call(menuKey&key);
+    case "VX":#目前先不调用具体的外部程序，先调用内部实现函数
+        voslog("调用"&menuString);
+        if(strcnt(menuString,"toplist"))
+            toplist(menuKey);
+        else
+            voslog("Unknow VX flow!");
+        endif
+        return 0;
+    endswitch
+    return 1;
+endfunc
+#--------------------------------------------------------
+func toplist(menuKey)
+    voslog("准备收听排行榜"&menuKey);
     
+endfunc
+#--------------------------------------------------------
+#模拟函数，测试流程使用
+func MyDigit(prp, digs, vald)
+    voslog("MyDigit() call MyDigitTTS()");
+    return MyDigitTTS(prp,digs,vald);
+endfunc
+#--------------------------------------------------------
+func MyDigitTTS(prp, digs, vald) #播放指定字符串的TTS语音提示并等待用户输入
+dec
+    var dig_string:15;
+    var l:1;
+    var overcont:1;
+    var li:127;
+    var cnt:10;
+enddec
+    overcont=0;
+    li=tmr_secs();
+    cnt=0;
+ReInput:
+    voslog("TTS_PLAY:"&prp);
+    while(1)
+        if (kb_qsize()>0)
+            l=kb_get();
+            if(not(strcnt(vald,l)))
+                voslog("输入按键非法["&vald&"]->"&l);
+                goto ReInput;
+            endif
+            if(l streq "*")
+                return "*";
+            endif
+            if(l streq "#" and substr(vald,1,1) streq "#")
+                return dig_string;
+            endif
+            dig_string+=l;
+            if(length(dig_string)>=digs)
+                return dig_string;
+            endif
+        endif
+        if(tmr_secs() - li > 30)
+            cnt++;
+            if(cnt>2)
+                voslog("超时，自动选择*返回");
+                return "*";
+            else
+                voslog("别发呆了，快选择吧["&cnt&"]");
+                li=tmr_secs();
+                continue;
+            endif
+        endif
+    endwhile
 endfunc
