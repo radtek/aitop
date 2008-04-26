@@ -18,3 +18,16 @@ t_func vosExit(int argc, char *argv[])
 	voslog("AiTopRll Exit Version:%s/%s Write By ¿Ó¿•¬ÿ",RLL_VER,RLL_SUB_VER);
 	return "";
 }
+
+
+t_func ai_isBlackList(int argc ,char *argv[])
+{
+	voslog("ai_isBlackList is a virtual function now!");
+	return "";
+}
+
+t_func ai_getProvince(int argc ,char *argv[])
+{
+	voslog("ai_getProvince is a virtual function now!");
+	return "";
+}
