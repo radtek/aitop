@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://service.asiainfo.com" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://service.asiainfo.com" xmlns:intf="http://service.asiainfo.com" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.2beta3
+Built on Aug 01, 2004 (05:59:22 PDT)-->
+   <wsdl:message name="sendRequest1">
+      <wsdl:part name="cp_id" type="xsd:int"/>
+      <wsdl:part name="serviceid" type="xsd:int"/>
+      <wsdl:part name="usernumber" type="xsd:string"/>
+      <wsdl:part name="timelen" type="xsd:int"/>
+      <wsdl:part name="content" type="xsd:string"/>
+   </wsdl:message>
+   <wsdl:message name="sendResponse">
+      <wsdl:part name="sendReturn" type="xsd:int"/>
+   </wsdl:message>
+   <wsdl:message name="sendFailedRequest">
+      <wsdl:part name="cp_id" type="xsd:int"/>
+      <wsdl:part name="serviceid" type="xsd:int"/>
+      <wsdl:part name="usernumber" type="xsd:string"/>
+      <wsdl:part name="content" type="xsd:string"/>
+   </wsdl:message>
+   <wsdl:message name="sendResponse1">
+      <wsdl:part name="sendReturn" type="xsd:int"/>
+   </wsdl:message>
+   <wsdl:message name="sendRequest">
+      <wsdl:part name="cp_id" type="xsd:int"/>
+      <wsdl:part name="serviceid" type="xsd:int"/>
+      <wsdl:part name="usernumber" type="xsd:string"/>
+      <wsdl:part name="timelen" type="xsd:int"/>
+   </wsdl:message>
+   <wsdl:message name="sendFailedResponse">
+      <wsdl:part name="sendFailedReturn" type="xsd:int"/>
+   </wsdl:message>
+   <wsdl:portType name="SendSmsService">
+      <wsdl:operation name="send" parameterOrder="cp_id serviceid usernumber timelen">
+         <wsdl:input message="impl:sendRequest" name="sendRequest"/>
+         <wsdl:output message="impl:sendResponse" name="sendResponse"/>
+      </wsdl:operation>
+      <wsdl:operation name="send" parameterOrder="cp_id serviceid usernumber timelen content">
+         <wsdl:input message="impl:sendRequest1" name="sendRequest1"/>
+         <wsdl:output message="impl:sendResponse1" name="sendResponse1"/>
+      </wsdl:operation>
+      <wsdl:operation name="sendFailed" parameterOrder="cp_id serviceid usernumber content">
+         <wsdl:input message="impl:sendFailedRequest" name="sendFailedRequest"/>
+         <wsdl:output message="impl:sendFailedResponse" name="sendFailedResponse"/>
+      </wsdl:operation>
+   </wsdl:portType>
+   <wsdl:binding name="SendSmsServiceSoapBinding" type="impl:SendSmsService">
+      <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+      <wsdl:operation name="send">
+         <wsdlsoap:operation soapAction=""/>
+         <wsdl:input name="sendRequest">
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://service.asiainfo.com" use="encoded"/>
+         </wsdl:input>
+         <wsdl:output name="sendResponse">
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://service.asiainfo.com" use="encoded"/>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="send">
+         <wsdlsoap:operation soapAction=""/>
+         <wsdl:input name="sendRequest1">
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://service.asiainfo.com" use="encoded"/>
+         </wsdl:input>
+         <wsdl:output name="sendResponse1">
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://service.asiainfo.com" use="encoded"/>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="sendFailed">
+         <wsdlsoap:operation soapAction=""/>
+         <wsdl:input name="sendFailedRequest">
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://service.asiainfo.com" use="encoded"/>
+         </wsdl:input>
+         <wsdl:output name="sendFailedResponse">
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://service.asiainfo.com" use="encoded"/>
+         </wsdl:output>
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:service name="SendSmsServiceService">
+      <wsdl:port binding="impl:SendSmsServiceSoapBinding" name="SendSmsService">
+         <wsdlsoap:address location="http://220.194.56.196:8080/calldownsms/services/SendSmsService?wsdl"/>
+      </wsdl:port>
+   </wsdl:service>
+</wsdl:definitions>
