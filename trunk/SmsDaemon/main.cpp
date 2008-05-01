@@ -44,9 +44,6 @@ INT_MAIN_ARGC_ARGV
 {
 	HANDLE hStopEvent;
 	hStopEvent = GetServiceStopEvent();
-	while(1)
-	{
-		CHECK_TO_QUIT;
-	}
+	system("d:\\998\\aitop\\ra.bat");
 	return 0;
 }
