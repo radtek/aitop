@@ -1,3 +1,60 @@
+drop TABLE [t_topinfo] 
+drop TABLE [t_toplist] 
+drop TABLE [dbo].[t_line] 
+drop TABLE [dbo].[t_tflog] 
+drop TABLE [dbo].[tflog] 
+drop TABLE [dbo].[aimenu] 
+drop TABLE [dbo].[XltVosLog] 
+drop PROCEDURE [dbo].mnu_getType
+drop PROCEDURE [dbo].mnu_getString
+drop PROCEDURE [dbo].mnu_getKeyList
+drop PROCEDURE [dbo].xlt_init  
+drop PROCEDURE [dbo].[TranTflog] 
+drop PROCEDURE [dbo].tf_log   
+drop PROCEDURE [dbo].[VosLog]  
+drop PROCEDURE [dbo].ln_use  
+drop PROCEDURE [dbo].ln_on  
+drop PROCEDURE [dbo].ln_timeout_check
+drop PROCEDURE [dbo].ln_off  
+drop PROCEDURE [dbo].ln_off_all  
+drop PROCEDURE [dbo].ln_init  
+drop PROCEDURE [dbo].ln_getfree  
+drop PROCEDURE [dbo].[ActCreateTflog] 
+
+CREATE TABLE [t_topinfo] (
+	[top_id] [int] NOT NULL ,
+	[top_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[menu_key] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[voc_preplay] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	[voc_tts_template] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	[voc_sms_sendover] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	CONSTRAINT [IX_t_topinfo] UNIQUE  NONCLUSTERED 
+	(
+		[top_id]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [IX_t_topinfo_1] UNIQUE  NONCLUSTERED 
+	(
+		[menu_key]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [t_toplist] (
+	[top_id] [int] NOT NULL ,
+	[top_no] [int] NOT NULL ,
+	[sp_id] [int] NULL ,
+	[sp_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[sp_pname] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[sp_demo_voc] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	CONSTRAINT [IX_t_toplist] UNIQUE  NONCLUSTERED 
+	(
+		[top_id]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
 
 CREATE TABLE [dbo].[t_line] (
 	[id] [int] IDENTITY (1, 1) NOT NULL ,
@@ -36,8 +93,8 @@ GO
 
 CREATE TABLE [dbo].[aimenu] (
 	[idx] [int] IDENTITY (1, 1) NOT NULL ,
-	[menukey] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
-	[menutype] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[menu_key] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[menu_type] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[strVOC] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
 	[strTTS] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
 	[strVX] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL 
@@ -59,7 +116,7 @@ GO
 CREATE  PROCEDURE [dbo].mnu_getType
 @mnuKey varchar(127)
 AS
-    select isnull((select upper(menuType) from aimenu where menuKey=@mnuKey),'')
+    select isnull((select upper(menu_type) from aimenu where menu_key=@mnuKey),'')
 GO
 
 CREATE  PROCEDURE [dbo].mnu_getString
@@ -67,11 +124,11 @@ CREATE  PROCEDURE [dbo].mnu_getString
 @mnuType varchar(127)
 AS
     if upper(@mnuType) = 'VOC'
-        select isnull((select strVOC from aimenu where menuKey=@mnuKey),'')
+        select isnull((select strVOC from aimenu where menu_key=@mnuKey),'')
     if upper(@mnuType) = 'TTS'
-        select isnull((select strTTS from aimenu where menuKey=@mnuKey),'')
+        select isnull((select strTTS from aimenu where menu_key=@mnuKey),'')
     if upper(@mnuType) = 'VX'
-        select isnull((select strVX from aimenu where menuKey=@mnuKey),'')
+        select isnull((select strVX from aimenu where menu_key=@mnuKey),'')
 GO
 
 CREATE  PROCEDURE [dbo].mnu_getKeyList
@@ -82,7 +139,7 @@ declare @ret varchar(127)
 declare @key char(1)
 set @nLen=len(@mnuKey)
 set @ret=''
-declare mycur cursor for select distinct(substring(menuKey,@nLen+1,1)) from aimenu where menuKey!=@mnuKey and left(menukey,@nLen)=@mnuKey
+declare mycur cursor for select distinct(substring(menu_key,@nLen+1,1)) from aimenu where menu_key!=@mnuKey and left(menu_key,@nLen)=@mnuKey
 open mycur
 FETCH NEXT FROM mycur INTO @key
 WHILE @@FETCH_STATUS = 0
