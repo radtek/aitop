@@ -50,9 +50,11 @@ void string_replace(std::string &strBig, const std::string &strsrc, const std::s
  
 t_func ai_strReplace(int argc,char *argv[])
 {
+	static char ret[128];
 	std::string str=argv[0];
 	std::string strFrom=argv[1];
 	std::string strTo=argv[2];
 	string_replace(str,strFrom,strTo);
-	return str.c_str();
+	strcpy(ret, str.c_str());
+	return ret;
 }
