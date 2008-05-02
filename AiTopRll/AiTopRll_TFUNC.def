@@ -4,3 +4,4 @@ vosExit,x
 #检查传入的号码是否是黑名单
 ai_isBlackList,1
 ai_getProvince,1
+ai_strReplace,3
