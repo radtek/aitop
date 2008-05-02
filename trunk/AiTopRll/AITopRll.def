@@ -1,0 +1,7 @@
+; AITopRll.def : Declares the module parameters for the DLL.
+
+LIBRARY      "AITopRll"
+DESCRIPTION  'AITopRll Windows Dynamic Link Library'
+
+EXPORTS
+    ; Explicit exports can go here
