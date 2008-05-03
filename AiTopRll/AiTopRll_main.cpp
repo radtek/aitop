@@ -58,3 +58,18 @@ t_func ai_strReplace(int argc,char *argv[])
 	strcpy(ret, str.c_str());
 	return ret;
 }
+
+t_func ai_openDatabase(int argc,char *argv[])
+{
+	return openDatabase(argv[0]);
+}
+
+t_func ai_execSqlA(int argc,char *argv[])
+{
+	return execSqlA(argv[0]);
+}
+
+t_func ai_execSqlB(int argc,char *argv[])
+{
+	return execSqlB(argv[0]);
+}
