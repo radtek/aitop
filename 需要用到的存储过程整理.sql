@@ -1,10 +1,12 @@
-drop TABLE [t_topinfo] 
-drop TABLE [t_toplist] 
+drop TABLE [dbo].[t_administrators]
+drop TABLE [dbo].[t_topinfo] 
+drop TABLE [dbo].[t_toplist] 
 drop TABLE [dbo].[t_line] 
 drop TABLE [dbo].[t_tflog] 
 drop TABLE [dbo].[tflog] 
-drop TABLE [dbo].[aimenu] 
+drop TABLE [dbo].[t_aimenu] 
 drop TABLE [dbo].[XltVosLog] 
+drop TABLE [dbo].[t_sms_queue]
 drop PROCEDURE [dbo].mnu_getType
 drop PROCEDURE [dbo].mnu_getString
 drop PROCEDURE [dbo].mnu_getKeyList
@@ -20,10 +22,39 @@ drop PROCEDURE [dbo].ln_off_all
 drop PROCEDURE [dbo].ln_init  
 drop PROCEDURE [dbo].ln_getfree  
 drop PROCEDURE [dbo].[ActCreateTflog] 
+drop PROCEDURE [dbo].[getTopInfo]
+drop PROCEDURE [dbo].[getTopInfoVoc]
+drop PROCEDURE [dbo].[getTopList]
+drop PROCEDURE [dbo].addSmsSendRequest
 
-CREATE TABLE [t_topinfo] (
+CREATE TABLE [dbo].[t_sms_queue] (
+	[idx] [int] IDENTITY (1, 1) NOT NULL ,
+	[caller] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[top_id] [int] NOT NULL ,
 	[top_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[sp_id] [int] NULL ,
+	[sp_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[sp_pid] [int] NULL ,
+	[sp_pname] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[state] [int] NOT NULL CONSTRAINT [DF__t_sms_que__state__25DB9BFC] DEFAULT (0),
+	[ctime] [datetime] NULL CONSTRAINT [DF_t_sms_queue_ctime] DEFAULT (getdate()),
+	[result] [int] NULL CONSTRAINT [DF_t_sms_queue_result] DEFAULT (0),
+	[cnt] [int] NULL CONSTRAINT [DF_t_sms_queue_cnt] DEFAULT (0),
+	[stime] [datetime] NULL ,
+	CONSTRAINT [PK_t_sms_queue] PRIMARY KEY  CLUSTERED 
+	(
+		[idx]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
+
+
+CREATE TABLE [dbo].[t_topinfo] (
+	[top_id] [int] NOT NULL ,
+	[top_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[area_code] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[menu_key] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[voc_preplay] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
 	[voc_tts_template] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
@@ -34,17 +65,20 @@ CREATE TABLE [t_topinfo] (
 	)  ON [PRIMARY] ,
 	CONSTRAINT [IX_t_topinfo_1] UNIQUE  NONCLUSTERED 
 	(
-		[menu_key]
+		[menu_key],
+		[area_code]
 	)  ON [PRIMARY] 
 ) ON [PRIMARY]
 GO
 
 
-CREATE TABLE [t_toplist] (
+
+CREATE TABLE [dbo].[t_toplist] (
 	[top_id] [int] NOT NULL ,
 	[top_no] [int] NOT NULL ,
 	[sp_id] [int] NULL ,
 	[sp_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[sp_pid] [int] NULL ,
 	[sp_pname] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[sp_demo_voc] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
 	CONSTRAINT [IX_t_toplist] UNIQUE  NONCLUSTERED 
@@ -54,9 +88,15 @@ CREATE TABLE [t_toplist] (
 ) ON [PRIMARY]
 GO
 
+CREATE TABLE [dbo].[t_administrators] (
+	[caller] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[lvl] [int] NULL CONSTRAINT [DF_t_administrators_lvl] DEFAULT (1),
+	[pwd] [char] (10) COLLATE Chinese_PRC_CI_AS NULL 
+) ON [PRIMARY]
+GO
 
 
-CREATE TABLE [dbo].[t_line] (
+CREATE TABLE [t_line] (
 	[id] [int] IDENTITY (1, 1) NOT NULL ,
 	[ln] [int] NOT NULL ,
 	[enable] [int] NOT NULL CONSTRAINT [DF_t_line_enable] DEFAULT (1),
@@ -65,9 +105,15 @@ CREATE TABLE [dbo].[t_line] (
 	[mno] [varchar] (20) COLLATE Chinese_PRC_CI_AS NOT NULL CONSTRAINT [DF_t_line_mno] DEFAULT (''),
 	[cle] [varchar] (20) COLLATE Chinese_PRC_CI_AS NOT NULL CONSTRAINT [DF_t_line_cle] DEFAULT (''),
 	[st] [datetime] NOT NULL CONSTRAINT [DF_t_line_st] DEFAULT (getdate()),
-	[desc] [varchar] (50) COLLATE Chinese_PRC_CI_AS NOT NULL CONSTRAINT [DF__t_line__desc__7B663F43] DEFAULT ('')
+	[desc] [varchar] (50) COLLATE Chinese_PRC_CI_AS NOT NULL CONSTRAINT [DF__t_line__desc__7B663F43] DEFAULT (''),
+	CONSTRAINT [PK_t_line] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] 
 ) ON [PRIMARY]
 GO
+
+
 CREATE TABLE [dbo].[t_tflog] (
 	[id] [int] IDENTITY (1, 1) NOT NULL ,
 	[ln] [int] NOT NULL ,
@@ -76,7 +122,11 @@ CREATE TABLE [dbo].[t_tflog] (
 	[callee] [varchar] (20) COLLATE Chinese_PRC_CI_AS NULL ,
 	[st] [datetime] NULL ,
 	[et] [datetime] NULL ,
-	[logstr] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL 
+	[logstr] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	CONSTRAINT [PK_t_tflog] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] 
 ) ON [PRIMARY]
 GO
 
@@ -87,17 +137,25 @@ CREATE TABLE [dbo].[tflog] (
 	[callee] [varchar] (20) COLLATE Chinese_PRC_CI_AS NULL ,
 	[st] [datetime] NULL ,
 	[et] [datetime] NULL ,
-	[logstr] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL 
+	[logstr] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	CONSTRAINT [PK_tflog] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] 
 ) ON [PRIMARY]
 GO
 
-CREATE TABLE [dbo].[aimenu] (
+CREATE TABLE [dbo].[t_aimenu] (
 	[idx] [int] IDENTITY (1, 1) NOT NULL ,
 	[menu_key] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[menu_type] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[strVOC] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
 	[strTTS] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
 	[strVX] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL 
+	CONSTRAINT [PK_t_aimenu] PRIMARY KEY  CLUSTERED 
+	(
+		[idx]
+	)  ON [PRIMARY] 
 ) ON [PRIMARY]
 GO
 
@@ -111,12 +169,66 @@ CREATE TABLE [dbo].[XltVosLog] (
 ) ON [PRIMARY]
 GO
 
+CREATE  PROCEDURE [dbo].addSmsSendRequest
+@caller char(32),
+@top_id int,
+@top_name char(32),
+@sp_id int,
+@sp_name char(32),
+@sp_pid int,
+@sp_pname char(32)
+AS
+insert into t_sms_queue(caller,top_id,top_name,sp_id,sp_name,sp_pid,sp_pname) values(@caller,@top_id,@top_name,@sp_id,@sp_name,@sp_pid,@sp_pname)
+select '1'
+GO
 
+
+CREATE PROCEDURE [dbo].[getTopInfo]
+@mnuKey char (32),
+@areaCode char (32)
+ AS  
+select top_id,top_name from t_topinfo where @mnuKey=menu_key and @areaCode=area_code
+if @@rowcount=0
+    select '' as errorno
+GO
+
+CREATE PROCEDURE [dbo].[getTopInfoVoc]
+@top_id int,
+@f int
+ AS  
+if @f = 1
+    select voc_preplay from t_topinfo where @top_id=top_id
+if @f = 2
+    select voc_tts_template from t_topinfo where  @top_id=top_id
+if @f = 3
+    select voc_sms_sendover from t_topinfo where  @top_id=top_id
+if @@rowcount=0
+    select '' as errorno
+GO
+
+CREATE PROCEDURE [dbo].[getTopList]
+@top_id int,
+@top_no int,
+@f int
+ AS  
+if @f = 1
+    select sp_id from t_toplist where @top_id=top_id and @top_no=top_no
+if @f = 2
+    select sp_name from t_toplist where  @top_id=top_id and @top_no=top_no
+if @f = 3
+    select sp_pid from t_toplist where @top_id=top_id and @top_no=top_no
+if @f = 4
+    select sp_pname from t_toplist where  @top_id=top_id and @top_no=top_no
+if @f = 5
+    select sp_demo_voc from t_toplist where  @top_id=top_id and @top_no=top_no
+if @@rowcount=0
+    select '' as errorno
+GO
 
 CREATE  PROCEDURE [dbo].mnu_getType
 @mnuKey varchar(127)
 AS
-    select isnull((select upper(menu_type) from aimenu where menu_key=@mnuKey),'')
+    select isnull((select upper(menu_type) from t_aimenu where menu_key=@mnuKey),'')
 GO
 
 CREATE  PROCEDURE [dbo].mnu_getString
@@ -124,11 +236,11 @@ CREATE  PROCEDURE [dbo].mnu_getString
 @mnuType varchar(127)
 AS
     if upper(@mnuType) = 'VOC'
-        select isnull((select strVOC from aimenu where menu_key=@mnuKey),'')
+        select isnull((select strVOC from t_aimenu where menu_key=@mnuKey),'')
     if upper(@mnuType) = 'TTS'
-        select isnull((select strTTS from aimenu where menu_key=@mnuKey),'')
+        select isnull((select strTTS from t_aimenu where menu_key=@mnuKey),'')
     if upper(@mnuType) = 'VX'
-        select isnull((select strVX from aimenu where menu_key=@mnuKey),'')
+        select isnull((select strVX from t_aimenu where menu_key=@mnuKey),'')
 GO
 
 CREATE  PROCEDURE [dbo].mnu_getKeyList
@@ -139,7 +251,7 @@ declare @ret varchar(127)
 declare @key char(1)
 set @nLen=len(@mnuKey)
 set @ret=''
-declare mycur cursor for select distinct(substring(menu_key,@nLen+1,1)) from aimenu where menu_key!=@mnuKey and left(menu_key,@nLen)=@mnuKey
+declare mycur cursor for select distinct(substring(menu_key,@nLen+1,1)) from t_aimenu where menu_key!=@mnuKey and left(menu_key,@nLen)=@mnuKey
 open mycur
 FETCH NEXT FROM mycur INTO @key
 WHILE @@FETCH_STATUS = 0

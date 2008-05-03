@@ -300,6 +300,10 @@ enddec
     #    myvoslog("呼入限制号码："&callernumber&"是系统黑名单");
     #    return 0;
     #endif
+    if(ai_isBlackList(callernumber))
+        myvoslog("呼入限制号码："&callernumber&"是系统黑名单");
+        return 0;
+    endif
     li=readreg("TestUsers");
     if(strcnt(li,callernumber))
         voslog(callernumber&"是测试用户号码，准许进入");
@@ -405,21 +409,10 @@ endfunc
 include "aifunc.vs"
 #--------------------------------------------------------
 func WaitHangup(destr)
-dec
-    var li:127;
-    var lk:127;
-    var lj:127;
-enddec
-    li=tmr_secs();
-    lj=date()&time();
-    lk=readreg("main_timelimit")+0;
-    if(lk eq 0)
-        lk=1200;
-    endif
     while(1)
         sleep(10);
-        if(tmr_secs() - li > lk) #通话时间大于600秒，挂断
-            myvoslog("WaitHangup("&destr&")时间大于"&lk&"秒，挂断["&lj&"-"&date()&time()&"]");
+        if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+            voslog(ln,"在线太长时间，挂断！");
             SysHangup();
         endif
         if(LoopChkMsg(destr))
@@ -505,16 +498,32 @@ func QueryWizlvl() #查询系统管理权限级别
     if(wizlvl strneq "")
         return wizlvl;
     endif
-    wizlvl=ExecSqlA("select isnull((select lvl from administrators where caller='"&Caller&"'),0)") +0;
+    wizlvl=ExecSqlA("select isnull((select lvl from t_administrators where caller='"&Caller&"'),0)") +0;
     return wizlvl;
+endfunc
+#--------------------------------------------------------
+func getkey()#检查是否有按键，有则返回按键值（取缓冲区内的第一个），否则返回空串
+dec
+    var li:127;
+enddec
+    if(tf_stat4(ln)<>0) #有按键则中断
+        tf_getdigits(ln,1,0,0);
+        li=tf_digits(ln);
+        tf_clrdigits(ln);
+        if(not(strcnt("ABCDEF",li)))
+            if(length(li)>1)
+                myvoslog("getkey()返回超过1位:"&li);
+            endif
+            return li;
+        endif
+    endif
+    return "";
 endfunc
 #--------------------------------------------------------
 func Main()
 dec
     var li:32;
-    var lj:32;
     var lf:127;
-    var lk:32;
     var pwd:127;
 enddec
     
@@ -566,7 +575,7 @@ enddec
         kin=MyDigit("gly_1",1,"1234567890");#"你的号码是管理员号码，按9号键进入管理菜单，按其他键进入排行榜",
         switch(kin)
         case 9:
-            pwd=ExecSqlA("select isnull((select pwd from administrators where caller='"&Caller&"'),'"&substr(date(),3,4)&substr(time(),1,2)&"') ");
+            pwd=ExecSqlA("select isnull((select pwd from t_administrators where caller='"&Caller&"'),'"&substr(date(),3,4)&substr(time(),1,2)&"') ");
             while(1)
                 li=MyDigit("tc66",20,"#1234567890");#请输入密码，按#号键确定
                 if(pwd)
@@ -623,7 +632,7 @@ enddec
             endwhile
         default:
             if(not(kin))
-                myvoslog(Caller&"输入操作码["&kin&"]，默认进入灵通乐园流程");
+                myvoslog(Caller&"输入操作码["&kin&"]，默认进入主流程");
             endif
         endswitch
     endif
@@ -638,39 +647,162 @@ enddec
     if(li and FileExist(MyDir&li&".voc"))
         Iplay(li); #如果存在欢迎语之前的语音文件，则播放之
     endif
-    li=tmr_secs();
-    lj=date()&time();
-    lk=readreg("main_timelimit")+0;
-    if(lk eq 0)
-        lk=1800;
-    endif
-  
-    
+   
     while(1) #主菜单
-
-        if(tmr_secs() - li > lk) #通话时间大于1800秒，挂断
-            myvoslog("用户呼入时间大于"&lk&"秒，挂断用户["&lj&"-"&date()&time()&"]");
-            SysHangup();
-        endif
-        
+        menu_call("A");
     endwhile
 endfunc
 #--------------------------------------------------------
-func getkey()#检查是否有按键，有则返回按键值（取缓冲区内的第一个），否则返回空串
-dec
-    var li:127;
-enddec
-    if(tf_stat4(ln)<>0) #有按键则中断
-        tf_getdigits(ln,1,0,0);
-        li=tf_digits(ln);
-        tf_clrdigits(ln);
-        if(not(strcnt("ABCDEF",li)))
-            if(length(li)>1)
-                myvoslog("getkey()返回超过1位:"&li);
-            endif
-            return li;
-        endif
+func timeout_check()
+    if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+        voslog(ln,"在线太长时间，挂断！");
+        SysHangup();
     endif
-    return "";
 endfunc
 #--------------------------------------------------------
+func menu_call(menuKey)
+dec
+    var menuType:127;
+    var menuString:127;
+    var keyallow:127;
+    var key:127;
+enddec
+    timeout_check();
+    voslog("menu_call("&menuKey&") is called!");
+    menuType=strrtrim(ExecSqlA("{call mnu_getType('"&menuKey&"')}"));
+    if(not(menuType))
+        voslog("错误的菜单KEY:"&menuKey);
+        voslog("menu_call("&menuKey&") is over!ERROR");
+        return 1;
+    endif
+    voslog("menuType="&menuType);
+    keyallow=strrtrim(ExecSqlA("{call mnu_getKeyList('"&menuKey&"')}"));
+    voslog("mnu_getKeyList="&keyallow);
+    menuString=strrtrim(ExecSqlA("{call mnu_getString('"&menuKey&"','"&menuType&"')}"));
+    voslog("menuString="&menuString);
+    switch(menuType)
+    case "TTS":
+        key=MyDigitTTS(menuString,1,keyallow);
+        voslog("key="&key);
+        return menu_call(menuKey&key);
+    case "VOC":
+        key=MyDigit(menuString,1,keyallow);
+        voslog("key="&key);
+        return menu_call(menuKey&key);
+    case "VX":#目前先不调用具体的外部程序，先调用内部实现函数
+        voslog("调用"&menuString);
+        if(strcnt(menuString,"toplist"))
+            toplist(menuKey);
+        else
+            voslog("Unknow VX flow!");
+        endif
+        voslog("menu_call("&menuKey&") is over!VX");
+        return 0;
+    endswitch
+    voslog("menu_call("&menuKey&") is over!NULL");
+    return 1;
+endfunc
+#--------------------------------------------------------
+func doSmartPlay(vocstr)
+    if(strlwr(strend(vocstr,4)) streq ".voc")
+        if(Iplay(vocstr))
+            return 1;
+        endif
+    endif
+    IplayTTS(vocstr);
+endfunc
+#--------------------------------------------------------
+func toplist(menuKey)
+dec
+    var top_id:32;
+    var top_name:127;
+    var voc_pre_play:127;
+    var voc_tts_template:127;
+    var voc_sms_send_over:127;
+    var li:127;
+    var lj:127;
+    var area_code:127;
+    var top_no:2;
+    var last_no:2;
+    var sp_id:11;
+    var sp_pid:11;
+    var sp_name:32;
+    var sp_pname:32;
+    var sp_demo_voc:127;
+enddec
+    voslog("准备收听排行榜"&menuKey);
+    area_code=ai_getProvince(Caller);
+    li=ExecSqlA("{call getTopInfo('"&menuKey&"','"&AreaCode&"')}");
+    if(not(li))
+        myvoslog("排行榜信息不存在menu_key["&menuKey&"] area_code["&area_code&"]");
+        return 2;
+    endif
+    top_id=Par(li,0);
+    top_name=Par(li,1);
+    voslog("排行榜信息top_id["&top_id&"]top_name["&top_name&"]");
+    voc_pre_play=ExecSqlA("{call getTopInfoVoc("&top_id&",1)}");
+    voc_tts_template=ExecSqlA("{call getTopInfoVoc("&top_id&",2)}");
+    voc_sms_send_over=ExecSqlA("{call getTopInfoVoc("&top_id&",3)}");
+    if(not(voc_pre_play and voc_tts_template and voc_sms_send_over))
+        voslog("没有获取到正确的排行榜语音信息"&voc_pre_play&"/"&voc_tts_template&"/"&voc_sms_send_over);
+        return 3;
+    endif
+    voslog("获取到排行榜语音信息"&voc_pre_play&"/"&voc_tts_template&"/"&voc_sms_send_over);
+
+    doSmartPlay(voc_pre_play);
+   
+    top_no=1;
+    last_no=0;
+    while(1)
+        if(last_no <> top_no)
+            last_no=top_no;
+            
+            sp_id=ExecSqlA("{call getTopList("&top_id&","&top_no&",1)}");
+            
+            if(not(sp_id))
+                voslog("没有取得第"&top_no&"条排行榜信息（榜尾？）");
+                break;
+            endif
+            sp_name=ExecSqlA("{call getTopList("&top_id&","&top_no&",2)}");
+            sp_pid=ExecSqlA("{call getTopList("&top_id&","&top_no&",3)}");
+            sp_pname=ExecSqlA("{call getTopList("&top_id&","&top_no&",4)}");
+            sp_demo_voc=ExecSqlA("{call getTopList("&top_id&","&top_no&",5)}");
+            
+            #voc_tts_template="$top_name排行榜第$top_no名是$sp_name的$sp_pname";
+            voc_tts_template=ai_strReplace(voc_tts_template,"$top_name",top_name);
+            voc_tts_template=ai_strReplace(voc_tts_template,"$top_no",top_no);
+            voc_tts_template=ai_strReplace(voc_tts_template,"$sp_name",sp_name);
+            voc_tts_template=ai_strReplace(voc_tts_template,"$sp_pname",sp_pname);
+            
+        else
+            voslog("重听一次:"&voc_tts_template);
+        endif
+        
+        lj=0;
+        while(1)
+            lj++;
+            timeout_check();
+            if(lj> 3)
+                voslog("重复3次无按键操作，挂断");
+                SysHangup();
+            endif
+            IplayTTS(voc_tts_template);
+            li=getkey();
+            if(li)
+                lj=0;
+                switch(li)
+                case "*":return "*";
+                case "#":#todo:发送短信
+                    ExecSqlA("{call addSmsSendRequest('"&Caller&"',"&top_id&",'"&top_name&"',"&sp_id&",'"&sp_name&"',"&sp_pid&",'"&sp_pname&"')}");
+                case 1:#下一条
+                    top_no++;
+                    break;
+                case 2:#重听
+                    continue;
+                endswitch
+            endif
+        endwhile
+        
+    endwhile
+    
+endfunc

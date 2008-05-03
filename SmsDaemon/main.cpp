@@ -38,12 +38,18 @@ const char* get_source_name( const char* pszsrc )
 #define CHECK_TO_QUIT_VOID do{if( CheckEvent( hStopEvent ) != EVENT_NOT_HAPPENED ) \
 { printf("must quit:%s(%d)", get_source_name(__FILE__),__LINE__ );return;}}while(0)
 
-
+#include "../AITopDB/DBExportFunctions.h"
 
 INT_MAIN_ARGC_ARGV
 {
 	HANDLE hStopEvent;
 	hStopEvent = GetServiceStopEvent();
+	char *myargv=new char[127];
+	strcpy(myargv,"DSN=aitop;UID=aitopivr;PWD=20080421;");
+	printf("openDatabase()=%s",openDatabase(myargv));
+	strcpy(myargv,"select count(*) from t_aimenu");
+	printf("execSqlA()=%s",execSqlA(myargv));
+	delete[] myargv;
 	system("d:\\998\\aitop\\ra.bat");
 	return 0;
 }
