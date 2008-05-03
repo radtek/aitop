@@ -692,7 +692,7 @@ enddec
     case "VX":#目前先不调用具体的外部程序，先调用内部实现函数
         voslog("调用"&menuString);
         if(strcnt(menuString,"toplist"))
-            toplist(menuKey);
+            toplist(menuKey&key);
         else
             voslog("Unknow VX flow!");
         endif
