@@ -85,6 +85,10 @@ dec
 enddec
     overcont=0;
 ReInput:
+    if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+        voslog(ln,"在线太长时间，挂断！");
+        SysHangup();
+    endif
     tf_clrdigits(ln);
     if (length(prp) eq 0)
         sleep(5);
@@ -285,6 +289,11 @@ dec
 enddec
     overcont=0;
 ReInput:
+    if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+        voslog(ln,"在线太长时间，挂断！");
+        SysHangup();
+    endif
+
     tf_clrdigits(ln);
     if (length(prp) eq 0)
         sleep(5);
@@ -461,6 +470,7 @@ enddec
     endif
     if(fn streq "")
         myvoslog("注意：Iplay("&vox_name&")无法正常调用");
+        return 0;
     else
         if(DEBUG)
             voslogln("Iplay/tf_playx("&fn&","&fmt&")");
@@ -470,6 +480,7 @@ enddec
     #if(dtmf eq DISABLE) 
         tf_toneint(ln,ENABLE); 
     #endif
+    return 1;
 endfunc
 #--------------------------------------------------------
 func Par(sss,pn)
