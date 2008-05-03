@@ -1,0 +1,206 @@
+/*
+t_sms_queue 发送短信的队列表
+
+caller 用户电话号码
+top_id 排行榜编号（每省每个种类一个编号）
+top_name 排行榜的名称
+sp_id 用户选择业务的sp编号
+sp_name 用户选择业务的sp名称
+sp_pid 用户选择业务的sp子业务编号
+sp_pname 用户选择业务的sp子业务名称
+state 发送状态（0为未发送，1已经发送，2放弃发送。。。）
+result 发送结果（0成功，1失败）
+cnt 尝试发送次数
+ctime 短信发送提交时间
+stime 最后一次发送时间
+*/
+CREATE TABLE [dbo].[t_sms_queue] (
+	[idx] [int] IDENTITY (1, 1) NOT NULL ,
+	[caller] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[top_id] [int] NOT NULL ,
+	[top_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[sp_id] [int] NULL ,
+	[sp_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[sp_pid] [int] NULL ,
+	[sp_pname] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[state] [int] NOT NULL CONSTRAINT [DF__t_sms_que__state__25DB9BFC] DEFAULT (0),
+	[ctime] [datetime] NULL CONSTRAINT [DF_t_sms_queue_ctime] DEFAULT (getdate()),
+	[result] [int] NULL CONSTRAINT [DF_t_sms_queue_result] DEFAULT (0),
+	[cnt] [int] NULL CONSTRAINT [DF_t_sms_queue_cnt] DEFAULT (0),
+	[stime] [datetime] NULL ,
+	CONSTRAINT [PK_t_sms_queue] PRIMARY KEY  CLUSTERED 
+	(
+		[idx]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+/*
+t_topinfo 排行榜信息表，用来存储排行榜与菜单按键的对应关系和语音信息
+
+top_id 排行榜编号（每省每个种类一个编号）
+top_name 排行榜的名称
+area_code 排行榜归属地区编号
+menu_key 排行榜对应菜单按键编码（与t_aimenu关联）
+voc_preplay 在开始收听排行榜之前需要播放的语音信息（可以是TTS，也可以是全路径的语音文件名）
+voc_tts_template 排行榜名次播放模板，例如：$top_name排行榜第$top_no名是$sp_name的$sp_pname
+voc_sms_sendover 用户选择发送短信后播报的语音（可以是TTS，也可以是全路径的语音文件名）
+*/
+
+CREATE TABLE [dbo].[t_topinfo] (
+	[top_id] [int] NOT NULL ,
+	[top_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[area_code] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[menu_key] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[voc_preplay] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	[voc_tts_template] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	[voc_sms_sendover] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	CONSTRAINT [IX_t_topinfo] UNIQUE  NONCLUSTERED 
+	(
+		[top_id]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [IX_t_topinfo_1] UNIQUE  NONCLUSTERED 
+	(
+		[menu_key],
+		[area_code]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+/*
+t_toplist 排行榜数据表，列举每个sp产品在排行榜上的情况
+
+top_id 排行榜编号（每省每个种类一个编号）
+top_no 排行榜名次
+sp_id SP的编号
+sp_name SP的名称
+sp_pid SP的业务编号
+sp_pname SP的业务名称
+sp_demo_voc SP的业务语音文件名
+*/
+CREATE TABLE [dbo].[t_toplist] (
+	[top_id] [int] NOT NULL ,
+	[top_no] [int] NOT NULL ,
+	[sp_id] [int] NULL ,
+	[sp_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[sp_pid] [int] NULL ,
+	[sp_pname] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[sp_demo_voc] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	CONSTRAINT [IX_t_toplist] UNIQUE  NONCLUSTERED 
+	(
+		[top_id]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+/*
+t_administrators 管理员信息表（未定义管理员行为，备用）
+
+caller 管理员号码
+lvl 管理员级别
+pwd 管理员密码
+*/
+CREATE TABLE [dbo].[t_administrators] (
+	[caller] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[lvl] [int] NULL CONSTRAINT [DF_t_administrators_lvl] DEFAULT (1),
+	[pwd] [char] (10) COLLATE Chinese_PRC_CI_AS NULL 
+) ON [PRIMARY]
+GO
+
+/*
+t_line 系统线路情况表（运行时状态）
+
+ln 线路编号（根据E1线路配置的通道数创建相应记录）
+enable 标记该线路是否启用（可控制外呼选线）
+stat 线路状态
+ctype 呼叫类型（呼入/呼出）
+mno 线路主叫方号码
+cle 线路被叫方号码
+st线路开始呼入时间
+desc 线路通话描述信息
+*/
+CREATE TABLE [t_line] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[ln] [int] NOT NULL ,
+	[enable] [int] NOT NULL CONSTRAINT [DF_t_line_enable] DEFAULT (1),
+	[stat] [int] NOT NULL CONSTRAINT [DF_t_line_stat] DEFAULT (0),
+	[ctype] [int] NOT NULL CONSTRAINT [DF_t_line_ctype] DEFAULT (0),
+	[mno] [varchar] (20) COLLATE Chinese_PRC_CI_AS NOT NULL CONSTRAINT [DF_t_line_mno] DEFAULT (''),
+	[cle] [varchar] (20) COLLATE Chinese_PRC_CI_AS NOT NULL CONSTRAINT [DF_t_line_cle] DEFAULT (''),
+	[st] [datetime] NOT NULL CONSTRAINT [DF_t_line_st] DEFAULT (getdate()),
+	[desc] [varchar] (50) COLLATE Chinese_PRC_CI_AS NOT NULL CONSTRAINT [DF__t_line__desc__7B663F43] DEFAULT (''),
+	CONSTRAINT [PK_t_line] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+/*用户拨打日志记录表（每月一表）
+ln 用户使用的线路编号
+calltype 呼入/呼出
+caller 主叫号码
+callee 被叫号码
+st 呼叫接续时间
+et 呼叫终止时间
+logstr呼叫描述字串
+*/
+CREATE TABLE [dbo].[t_tflog] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[ln] [int] NOT NULL ,
+	[calltype] [int] NULL ,
+	[caller] [varchar] (20) COLLATE Chinese_PRC_CI_AS NULL ,
+	[callee] [varchar] (20) COLLATE Chinese_PRC_CI_AS NULL ,
+	[st] [datetime] NULL ,
+	[et] [datetime] NULL ,
+	[logstr] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	CONSTRAINT [PK_t_tflog] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+/*tflog表冗余*/
+CREATE TABLE [dbo].[tflog] (
+	[id] [int] IDENTITY (1, 1) NOT NULL ,
+	[calltype] [int] NULL ,
+	[caller] [varchar] (20) COLLATE Chinese_PRC_CI_AS NULL ,
+	[callee] [varchar] (20) COLLATE Chinese_PRC_CI_AS NULL ,
+	[st] [datetime] NULL ,
+	[et] [datetime] NULL ,
+	[logstr] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	CONSTRAINT [PK_tflog] PRIMARY KEY  CLUSTERED 
+	(
+		[id]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+/*主菜单语音控制表t_aimenu
+
+menu_key 菜单键码，由各级按键顺序相连形成
+menu_type 菜单语音类型，TTS，VOC，还是排行榜流程
+*/
+CREATE TABLE [dbo].[t_aimenu] (
+	[idx] [int] IDENTITY (1, 1) NOT NULL ,
+	[menu_key] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[menu_type] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[strVOC] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	[strTTS] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	[strVX] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL 
+	CONSTRAINT [PK_t_aimenu] PRIMARY KEY  CLUSTERED 
+	(
+		[idx]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+CREATE TABLE [dbo].[XltVosLog] (
+	[ID] [bigint] IDENTITY (1, 1) NOT NULL ,
+	[LineID] [int] NULL ,
+	[Caller] [varchar] (32) COLLATE Chinese_PRC_CI_AS NULL ,
+	[Callee] [varchar] (32) COLLATE Chinese_PRC_CI_AS NULL ,
+	[Logstr] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	[dt] [datetime] NULL CONSTRAINT [DF_XltVoiceLog_dt] DEFAULT (getdate())
+) ON [PRIMARY]
+GO
