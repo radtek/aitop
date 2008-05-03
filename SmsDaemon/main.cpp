@@ -1,4 +1,5 @@
 #include <windows.h> 
+#include <process.h>
 
 #define SERVICE_NAME "SmsDaemon"
 #include "WinService.h"
@@ -40,16 +41,42 @@ const char* get_source_name( const char* pszsrc )
 
 #include "../AITopDB/DBExportFunctions.h"
 
+char pszOdbcInfo[128];
+HANDLE hStopEvent;
+
+void threadFunc(void *)
+{
+	strcpy(pszOdbcInfo,readreg("OdbcInfo"));
+	if(!strlen(pszOdbcInfo))
+	{
+		strcpy(pszOdbcInfo,"DSN=aitop;UID=aitopivr;PWD=20080421;");
+	}
+	openDatabase(pszOdbcInfo);
+
+	char sms_id[127];
+	char sms_sp_id[127];
+	char sms_sp_pid[127];
+
+	while(1)
+	{
+		CHECK_TO_QUIT_VOID;
+		Sleep(500);
+		strcpy(sms_id,execSqlA("{call pickSmsFromQueue}"));
+		if(*sms_id)
+		{
+			//TODO:取到待发送的短信
+		}
+	}
+}
+
 INT_MAIN_ARGC_ARGV
 {
-	HANDLE hStopEvent;
 	hStopEvent = GetServiceStopEvent();
-	char *myargv=new char[127];
-	strcpy(myargv,"DSN=aitop;UID=aitopivr;PWD=20080421;");
-	printf("openDatabase()=%s",openDatabase(myargv));
-	strcpy(myargv,"select count(*) from t_aimenu");
-	printf("execSqlA()=%s",execSqlA(myargv));
-	delete[] myargv;
-	system("d:\\998\\aitop\\ra.bat");
+	_beginthread(threadFunc,0,0);//启动轮询线程
+	//启动VOS载入线程
+	while(1)
+	{
+		CHECK_TO_QUIT;
+	}
 	return 0;
 }

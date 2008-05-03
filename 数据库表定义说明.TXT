@@ -180,6 +180,9 @@ GO
 
 menu_key 菜单键码，由各级按键顺序相连形成
 menu_type 菜单语音类型，TTS，VOC，还是排行榜流程
+strVOC 该菜单项对应的语音文件名（全路径）
+strTTS 该菜单项对应的TTS语音文字（127个字符的长度限制）
+strVX 待扩展，可以一律设置为toplist，标识该菜单项应该对应其中一个排行榜流程
 */
 CREATE TABLE [dbo].[t_aimenu] (
 	[idx] [int] IDENTITY (1, 1) NOT NULL ,
@@ -195,6 +198,13 @@ CREATE TABLE [dbo].[t_aimenu] (
 ) ON [PRIMARY]
 GO
 
+/*语音程序日志信息表xltvoslog
+lineid 线路编号
+caller 线路的主叫号码
+callee 线路的被叫号码信息
+logstr 相应的日志文本信息
+dt 日志信息记录的时间信息
+*/
 CREATE TABLE [dbo].[XltVosLog] (
 	[ID] [bigint] IDENTITY (1, 1) NOT NULL ,
 	[LineID] [int] NULL ,
