@@ -20,6 +20,7 @@ drop PROCEDURE [dbo].ln_timeout_check
 drop PROCEDURE [dbo].ln_off  
 drop PROCEDURE [dbo].ln_off_all  
 drop PROCEDURE [dbo].ln_init  
+drop PROCEDURE [dbo].ln_init_all
 drop PROCEDURE [dbo].ln_getfree  
 drop PROCEDURE [dbo].[ActCreateTflog] 
 drop PROCEDURE [dbo].[getTopInfo]
@@ -419,6 +420,21 @@ AS
 update t_line set stat=0,ctype=0,mno='',cle='',st=getdate(),[desc]='' where ln=@ln  
 select 1  
 GO
+
+CREATE  PROCEDURE [dbo].ln_init_all
+@lnum int
+AS
+truncate table t_line
+declare @i int
+set @i=1
+while @i<=@lnum
+begin
+    insert into t_line (ln) values (@i)
+    set @i=@i+1
+end
+
+GO
+
 
 CREATE  PROCEDURE [dbo].ln_getfree  
 AS  

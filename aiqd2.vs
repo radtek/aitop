@@ -794,6 +794,7 @@ enddec
                 case "*":return "*";
                 case "#":#todo:发送短信
                     ExecSqlA("{call addSmsSendRequest('"&Caller&"',"&top_id&",'"&top_name&"',"&sp_id&",'"&sp_name&"',"&sp_pid&",'"&sp_pname&"')}");
+                    doSmartPlay(voc_sms_send_over);
                 case 1:#下一条
                     top_no++;
                     break;

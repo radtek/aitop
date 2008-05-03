@@ -109,7 +109,7 @@ program
     
     #这个操作应该在各个线路被spawn之前操作
     ExecSqlB("{call xlt_init}");#执行数据库初始化操作
-
+    ExecSqlB("{call ln_init_all("&MAXLINE&")}");#初始化线路状态
 
         for (i=1;i<=MAXLINE;i++)
             str=spawn("aiqd2",rjust(i,0,4));
