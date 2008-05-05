@@ -1,0 +1,7 @@
+; ADO_DB.def : Declares the module parameters for the DLL.
+
+LIBRARY      "ADO_DB"
+DESCRIPTION  'ADO_DB Windows Dynamic Link Library'
+
+EXPORTS
+    ; Explicit exports can go here
