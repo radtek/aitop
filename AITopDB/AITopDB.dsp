@@ -1,23 +1,23 @@
-# Microsoft Developer Studio Project File - Name="AITopRll" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="AITopDB" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
-CFG=AITopRll - Win32 Release
+CFG=AITopDB - Win32 Release
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "AITopRll.mak".
+!MESSAGE NMAKE /f "AITopDB.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "AITopRll.mak" CFG="AITopRll - Win32 Release"
+!MESSAGE NMAKE /f "AITopDB.mak" CFG="AITopDB - Win32 Release"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "AITopRll - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "AITopDB - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -52,37 +52,29 @@ LINK32=link.exe
 # ADD LINK32 /nologo /subsystem:windows /dll /map /debug /machine:I386
 # Begin Target
 
-# Name "AITopRll - Win32 Release"
+# Name "AITopDB - Win32 Release"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\AITopRll.cpp
+SOURCE=.\AITopDB.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\AITopRll.def
+SOURCE=.\AITopDB.def
 # End Source File
 # Begin Source File
 
-SOURCE=.\AITopRll.rc
+SOURCE=.\AITopDB.rc
 # End Source File
 # Begin Source File
 
-SOURCE=.\AiTopRll_.cpp
+SOURCE=.\DBExportFunctions.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\AiTopRll_main.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Log.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\MTNLIB.CPP
+SOURCE=.\IDataBase.cpp
 # End Source File
 # Begin Source File
 
@@ -95,31 +87,19 @@ SOURCE=.\StdAfx.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\AITopRll.h
+SOURCE=.\AITopDB.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\AiTopRll_main.h
+SOURCE=.\DBExportFunctions.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Log.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\MTNLIB.H
-# End Source File
-# Begin Source File
-
-SOURCE=.\NTRLL.H
+SOURCE=.\IDataBase.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\Resource.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\RLLSTRUC.H
 # End Source File
 # Begin Source File
 
@@ -131,7 +111,7 @@ SOURCE=.\StdAfx.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
-SOURCE=.\res\AITopRll.rc2
+SOURCE=.\res\AITopDB.rc2
 # End Source File
 # End Group
 # Begin Source File

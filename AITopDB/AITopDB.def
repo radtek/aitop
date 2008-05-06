@@ -1,0 +1,7 @@
+; AITopDB.def : Declares the module parameters for the DLL.
+
+LIBRARY      "AITopDB"
+DESCRIPTION  'AITopDB Windows Dynamic Link Library'
+
+EXPORTS
+    ; Explicit exports can go here
