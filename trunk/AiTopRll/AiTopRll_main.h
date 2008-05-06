@@ -4,6 +4,12 @@
 extern CLog g_log(NULL);
 
 #pragma comment(lib,"aitopdb.lib")
-LPCSTR openDatabase(char *argv);
-LPCSTR execSqlA(char *argv);
-LPCSTR execSqlB(char *argv);
+#include "../AITopDB/DBExportFunctions.h"
+
+#pragma comment(lib,"services.lib")
+#include "../wjg/Services/Server.h"
+
+#include <string>
+
+using namespace std;
+void string_replace(std::string &strBig, const std::string &strsrc, const std::string &strdst);

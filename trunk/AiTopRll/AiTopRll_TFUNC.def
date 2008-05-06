@@ -8,3 +8,4 @@ ai_strReplace,3
 ai_openDatabase,1
 ai_execSqlA,1
 ai_execSqlB,1
+ai_getProvince,1
