@@ -57,6 +57,18 @@ LINK32=link.exe
 
 SOURCE=.\main.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\soapC.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\soapClient.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\stdsoap2.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -67,6 +79,18 @@ SOURCE=.\NTServiceC.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\soapH.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\soapSendSmsServiceSoapBindingProxy.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\stdsoap2.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\WinService.h
 # End Source File
 # End Group
@@ -74,5 +98,9 @@ SOURCE=.\WinService.h
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # End Group
+# Begin Source File
+
+SOURCE=.\SendSmsServiceSoapBinding.nsmap
+# End Source File
 # End Target
 # End Project
