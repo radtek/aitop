@@ -3,7 +3,7 @@
 
 #include "IDataBase.h"
 IDataBase g_db;
-LPCSTR openDatabase(char *argv)
+LPCSTR openDatabase(const char *argv)
 {
 	if(g_db.OpenDatabase(argv)==SQL_SUCCESS)
 		return "1";
@@ -11,7 +11,7 @@ LPCSTR openDatabase(char *argv)
 		return "0";
 }
 
-LPCSTR execSqlA(char *argv)
+LPCSTR execSqlA(const char *argv)
 {
 	int ret;
 	static char res[128];
@@ -22,7 +22,7 @@ LPCSTR execSqlA(char *argv)
 		return "0";
 }
 
-LPCSTR execSqlB(char *argv)
+LPCSTR execSqlB(const char *argv)
 {
 	int ret;
 	ret=g_db.ExecSqlB(argv);
@@ -99,7 +99,7 @@ CString ReadReg(LPCTSTR Key,LPCTSTR REG="SOFTWARE\\KunLun",HKEY hKey =HKEY_LOCAL
 }
 
 
-LPCSTR readreg(char *argv)
+LPCSTR readreg(const char *argv)
 {
     static char vstr[128];
 	CString tmp=ReadReg(argv);

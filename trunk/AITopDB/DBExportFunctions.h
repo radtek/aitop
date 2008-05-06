@@ -1,17 +1,17 @@
 #ifndef __DB_EXPORT_FUNCTIONS__
 #define __DB_EXPORT_FUNCTIONS__
- 
-#ifdef _WINDLL
- __declspec(dllexport) LPCSTR openDatabase(char *argv);
- __declspec(dllexport) LPCSTR execSqlA(char *argv);
- __declspec(dllexport) LPCSTR execSqlB(char *argv);
- __declspec(dllexport) LPCSTR readreg(char *argv);
+
+#ifdef _AITOPDB_DLL
+ __declspec(dllexport) LPCSTR openDatabase(const char *argv);
+ __declspec(dllexport) LPCSTR execSqlA(const char *argv);
+ __declspec(dllexport) LPCSTR execSqlB(const char *argv);
+ __declspec(dllexport) LPCSTR readreg(const char *argv);
 #else
 #pragma comment(lib,"aitopdb.lib")
- LPCSTR openDatabase(char *argv);
- LPCSTR execSqlA(char *argv);
- LPCSTR execSqlB(char *argv);
- LPCSTR readreg(char *argv);
+ LPCSTR openDatabase(const char *argv);
+ LPCSTR execSqlA(const char *argv);
+ LPCSTR execSqlB(const char *argv);
+ LPCSTR readreg(const char *argv);
 #endif
 
 #endif
