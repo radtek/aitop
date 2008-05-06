@@ -53,6 +53,10 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /dll /machine:I386
 # ADD LINK32 /nologo /subsystem:windows /dll /machine:I386
+# Begin Special Build Tool
+SOURCE="$(InputPath)"
+PostBuild_Cmds=copy                    $(TARGETPATH)                    %APPBIN%\\                   	copy                    $(TargetDir)\$(TARGETNAME).lib                    %APPLIB%\\           	copy                 $(TargetDir)\$(TARGETNAME).pdb                 %APPBIN%\\                	copy                 $(TargetDir)\$(TARGETNAME)_vc60.pdb                 %APPBIN%\\         	copy                   $(TargetDir)\$(TARGETNAME).map                  %APPBIN%\\ 
+# End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "Services - Win32 Debug"
 
@@ -78,6 +82,10 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
+# Begin Special Build Tool
+SOURCE="$(InputPath)"
+PostBuild_Cmds=copy                    $(TARGETPATH)                    %APPBIN%\\                   	copy                    $(TargetDir)\$(TARGETNAME).lib                    %APPLIB%\\           	copy                 $(TargetDir)\$(TARGETNAME).pdb                 %APPBIN%\\                	copy                 $(TargetDir)\$(TARGETNAME)_vc60.pdb                 %APPBIN%\\         	copy                   $(TargetDir)\$(TARGETNAME).map                  %APPBIN%\\ 
+# End Special Build Tool
 
 !ENDIF 
 
