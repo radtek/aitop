@@ -36,8 +36,8 @@ int IDataBase::ExecSqlB(LPCSTR sql)
 			//sprintf(tmp,"错误！执行前无法连接数据库：%s\r\n",e1->m_strError);
 			//theApp.SysLog (tmp );
 			ret=SQL_ERROR;
-    		voslog("SQLExec错误%d，信息：%s\r\n",e1->m_nRetCode ,e1->m_strError);
-			voslog("ErrorSQL:%s\r\n",sql);
+    		TRACE("SQLExec错误%d，信息：%s\r\n",e1->m_nRetCode ,e1->m_strError);
+			TRACE("ErrorSQL:%s\r\n",sql);
 		}
 		END_CATCH
 	}
@@ -90,8 +90,8 @@ int IDataBase::ExecSqlA(LPCSTR sql,char * rets)
 	CATCH(CDBException,e)
 	{
 		rs.Close();
-		voslog("ErrorSQL:%s\r\n",sql);
-		voslog("SQLExec错误%d，信息：%s\r\n",e->m_nRetCode ,e->m_strError);
+		TRACE("ErrorSQL:%s\r\n",sql);
+		TRACE("SQLExec错误%d，信息：%s\r\n",e->m_nRetCode ,e->m_strError);
 		OpenDatabase(NULL);		//无论什么错误都重新连接数据库？
 		return SQL_ERROR;
 	}
@@ -116,7 +116,7 @@ int IDataBase::OpenDatabase(LPCSTR str)
 	}
 	CATCH(CDBException,e1)
 	{
-		voslog("错误！无法打开数据库：%s\r\n",e1->m_strError);
+		TRACE("错误！无法打开数据库：%s\r\n",e1->m_strError);
 		return SQL_ERROR;
 	}
 	END_CATCH

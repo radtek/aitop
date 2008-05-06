@@ -18,14 +18,6 @@
 #include <afxdao.h>			// MFC DAO Êý¾Ý¿âÀà
 #endif // _AFX_NO_DAO_SUPPORT
 
-//copy from ntrll.h
-extern "C"
-{
-	extern FARPROC fpVOSfunc_[];
-	typedef void (*VOID_LPCSTR_)(LPCSTR,...);
-#define voslog		(*(VOID_LPCSTR_) fpVOSfunc_[6])
-};
-
 class IDataBase  
 {
 public:
