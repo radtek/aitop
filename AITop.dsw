@@ -27,31 +27,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "SmsClient"=.\SmsClient\SmsClient.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "SmsDaemon"=.\SmsDaemon\SmsDaemon.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "SmsServer"=.\SmsSever\SmsServer.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
