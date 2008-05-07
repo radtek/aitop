@@ -117,7 +117,8 @@ enddec
 program
     ln=arg(1);
     
-    ExecSqlA("{call ln_init("&ln&")}");
+    #ExecSqlA("{call ln_init("&ln&")}");
+    ln_init(ln);
     
     tmr_start();
     lnc=0;
@@ -411,7 +412,8 @@ include "aifunc.vs"
 func WaitHangup(destr)
     while(1)
         sleep(10);
-        if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+        #if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+        if(db_chkTimeOut(ln))
             voslog(ln,"在线太长时间，挂断！");
             SysHangup();
         endif
@@ -654,7 +656,8 @@ enddec
 endfunc
 #--------------------------------------------------------
 func timeout_check()
-    if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+    #if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+    if(db_chkTimeOut(ln))
         voslog(ln,"在线太长时间，挂断！");
         SysHangup();
     endif

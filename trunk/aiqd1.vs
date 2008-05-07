@@ -108,8 +108,10 @@ program
     endfor 
     
     #这个操作应该在各个线路被spawn之前操作
-    ExecSqlB("{call xlt_init}");#执行数据库初始化操作
-    ExecSqlB("{call ln_init_all("&MAXLINE&")}");#初始化线路状态
+    #ExecSqlB("{call xlt_init}");#执行数据库初始化操作
+    db_init();
+    #ExecSqlB("{call ln_init_all("&MAXLINE&")}");#初始化线路状态
+    ln_init_all(MAXLINE);
 
         for (i=1;i<=MAXLINE;i++)
             str=spawn("aiqd2",rjust(i,0,4));
@@ -405,7 +407,8 @@ endfunc
 #--------------------------------------------------------
 func myvoslog(logmsg)
     voslog("0,0,0,"&logmsg);
-    return ExecSqlA("{call VosLog(0,'0','0','"&glb_get(g_IvrIndex)&strstrip(logmsg,"'")&"')}");
+   # return ExecSqlA("{call VosLog(0,'0','0','"&glb_get(g_IvrIndex)&strstrip(logmsg,"'")&"')}");
+    return ai_dblog(0,0,0,glb_get(g_IvrIndex),strstrip(logmsg,"'"));
 endfunc
 #--------------------------------------------------------
 func menu_call(menuKey)
@@ -421,16 +424,20 @@ enddec
 #        SysHangup();
 #    endif
     voslog("menu_call("&menuKey&") is called!");
-    menuType=strrtrim(ExecSqlA("{call mnu_getType('"&menuKey&"')}"));
+    #menuType=strrtrim(ExecSqlA("{call mnu_getType('"&menuKey&"')}"));
+    menuType=strrtrim(db_getMenuType(menuKey));
     if(not(menuType))
         voslog("错误的菜单KEY:"&menuKey);
         voslog("menu_call("&menuKey&") is over!ERROR");
         return 1;
     endif
     voslog("menuType="&menuType);
-    keyallow=strrtrim(ExecSqlA("{call mnu_getKeyList('"&menuKey&"')}"));
+    #keyallow=strrtrim(ExecSqlA("{call mnu_getKeyList('"&menuKey&"')}"));
+    keyallow=strrtrim(db_getMenuKeyList(menuKey&));
+    
     voslog("mnu_getKeyList="&keyallow);
-    menuString=strrtrim(ExecSqlA("{call mnu_getString('"&menuKey&"','"&menuType&"')}"));
+   # menuString=strrtrim(ExecSqlA("{call mnu_getString('"&menuKey&"','"&menuType&"')}"));
+    menuString=strrtrim(db_getMenuString(menuKey,menuType));
     voslog("menuString="&menuString);
     switch(menuType)
     case "TTS":
