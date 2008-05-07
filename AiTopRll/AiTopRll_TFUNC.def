@@ -8,4 +8,17 @@ ai_strReplace,3
 ai_openDatabase,1
 ai_execSqlA,1
 ai_execSqlB,1
+ai_dblog,5
 ai_getProvince,1
+ai_LockWorkStation,0
+
+ln_getFreeLine,0
+ln_getLineInfo,1
+ln_init,1
+ln_init_all,1
+
+db_init,0
+db_chkTimeOut,1
+db_getMenuType,1
+db_getMenuKeyList,1
+db_getMenuString,2
