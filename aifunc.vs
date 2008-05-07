@@ -85,7 +85,8 @@ dec
 enddec
     overcont=0;
 ReInput:
-    if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+    #if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+    if(db_chkTimeOut(ln))
         voslog(ln,"在线太长时间，挂断！");
         SysHangup();
     endif
@@ -289,7 +290,8 @@ dec
 enddec
     overcont=0;
 ReInput:
-    if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+    #if(ExecSqlA("{call ln_timeout_check("&ln&")}"))
+    if(db_chkTimeOut(ln))
         voslog(ln,"在线太长时间，挂断！");
         SysHangup();
     endif
@@ -666,15 +668,18 @@ enddec
     
     m=readreg("FreeLineType");
     if(m<2)
-        l=ExecSqlA("{call ln_getfree}");
+        #l=ExecSqlA("{call ln_getfree}");
+        l=ln_getFreeLine();
         if(l)
             if(tf_lineState(l) eq CH_FREE)
                 myvoslog("新逻辑选线OK"&l&"/"&CH_FREE);
-                myvoslog("新逻辑选线="&ExecSqlA("select ln,stat,rtrim(ltrim(mno)),rtrim(ltrim(cle)),st from t_line where ln="&l));
+                #myvoslog("新逻辑选线="&ExecSqlA("select ln,stat,rtrim(ltrim(mno)),rtrim(ltrim(cle)),st from t_line where ln="&l));
+                myvoslog("新逻辑选线="&ln_getLineInfo(l));
                 return l;
             endif
             myvoslog("新逻辑选线FAIL"&l&"/"&tf_lineState(l)&"!="&CH_FREE);
-            myvoslog("新逻辑选线="&ExecSqlA("select ln,stat,rtrim(ltrim(mno)),rtrim(ltrim(cle)),st from t_line where ln="&l));
+            #myvoslog("新逻辑选线="&ExecSqlA("select ln,stat,rtrim(ltrim(mno)),rtrim(ltrim(cle)),st from t_line where ln="&l));
+            myvoslog("新逻辑选线="&ln_getLineInfo(l));
         else
             myvoslog("新逻辑选线FAIL->ln_getfree返回["&l&"]");
         endif
