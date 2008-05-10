@@ -176,7 +176,8 @@ program
     endwhile
     #以下代码都是管理语音卡的
 
-    ExecSqlA("{call ln_use("&ln&")}");#先标记占用，避免发生呼出选线冲突
+    #ExecSqlA("{call ln_use("&ln&")}");#先标记占用，避免发生呼出选线冲突
+    ln_use(ln);
     
 
     logdt1=date()&time(); #这个语句必须要在第一个挂机前调用，并且由于在onsignal里对Caller的特殊判断，必须要在Caller被赋值前才能确保不错
@@ -214,7 +215,8 @@ program
         IsCallout=2;#对于外呼的记录打上标记
     endif
     
-    ExecSqlA("{call ln_on("&ln&","&(IsCallout+1)&","&IsCallout&",'"&Caller&"','"&Callee&"','"&logstr&"')}");
+    #ExecSqlA("{call ln_on("&ln&","&(IsCallout+1)&","&IsCallout&",'"&Caller&"','"&Callee&"','"&logstr&"')}");
+    ln_on(ln,(IsCallout+1),IsCallout,Caler,Callee,logstr);
         
     if(IsCallout eq 1) #为0或者为2都要允许进入主流程
         voslogln("callout => Callee["&RealCallee&"/"&Callee&"] Caller["&Caller&"] IsCallout["&IsCallout&"] str["&str&"]");
@@ -264,8 +266,10 @@ func MyOnSignal()
         #if(DEBUG)
             voslogln("{call tf_log('"&IsCallout&"','"&Caller&"','"&Callee&"','"&SqlDateTime(logdt1)&"','"&SqlDateTime(date()&time())&"','"&logstr&"')}");
         #endif
-        ExecSqlA("{call tf_log('"&IsCallout&"','"&Caller&"','"&Callee&"','"&SqlDateTime(logdt1)&"','"&SqlDateTime(date()&time())&"','"&logstr&"')}");
-        ExecSqlA("{call ln_off("&ln&")}");
+        #ExecSqlA("{call tf_log('"&IsCallout&"','"&Caller&"','"&Callee&"','"&SqlDateTime(logdt1)&"','"&SqlDateTime(date()&time())&"','"&logstr&"')}");
+        ai_tflog(IsCallout,Caller,Callee,SqlDateTime(logdt1),SqlDateTime(date()&time()),logstr);
+        #ExecSqlA("{call ln_off("&ln&")}");
+        ln_off(ln);
         
         if(DEBUG and Callee streq "")
             myvoslog("注意：被叫空!"&substr(msg,26));
@@ -289,7 +293,8 @@ endfunc
 #--------------------------------------------------------
 func myvoslog(logmsg)
     voslogln(Caller&","&Callee&","&logmsg);
-    return ExecSqlA("{call voslog("&ln&",'"&Caller&"','"&Callee&"','"&glb_get(g_IvrIndex)&strstrip(logmsg,"'")&"')}");
+    #return ExecSqlA("{call voslog("&ln&",'"&Caller&"','"&Callee&"','"&glb_get(g_IvrIndex)&strstrip(logmsg,"'")&"')}");
+    return ai_dblog(ln,Caller,Callee,glb_get(g_IvrIndex),logmsg);
 endfunc
 #--------------------------------------------------------
 func AllowCallin(callernumber)
@@ -500,7 +505,8 @@ func QueryWizlvl() #查询系统管理权限级别
     if(wizlvl strneq "")
         return wizlvl;
     endif
-    wizlvl=ExecSqlA("select isnull((select lvl from t_administrators where caller='"&Caller&"'),0)") +0;
+    #wizlvl=ExecSqlA("select isnull((select lvl from t_administrators where caller='"&Caller&"'),0)") +0;
+    wizlvl=ai_getUserLevel(Caller);
     return wizlvl;
 endfunc
 #--------------------------------------------------------
@@ -542,7 +548,8 @@ enddec
     #判断是否是系统黑名单
     
     #判断是否主叫三方通话，注意后面还要判断被叫进行三方通话的情况！
-    kin=ExecSqlA("select ln from t_line where stat=1 and mno='"&Caller&"' and ln!="&(ln+0)) ;
+    #kin=ExecSqlA("select ln from t_line where stat=1 and mno='"&Caller&"' and ln!="&(ln+0)) ;
+    kin=ln_checkOnlineCaller(ln,Caller);
     if(kin and not(QueryWizlvl()))
         myvoslog("与第"&kin&"线路主叫号码重复，怀疑三方通话，拒绝接入"&IsCallout);
         Nplay("sysbusy");
@@ -556,7 +563,8 @@ enddec
         endwhile
     endif
     #判断是否三方通话
-    kin=ExecSqlA("select ln from t_line where stat>1 and cle='"&Caller&"'") ;
+    #kin=ExecSqlA("select ln from t_line where stat>1 and cle='"&Caller&"'") ;
+    kin=ln_checkOnlineCallee(ln,Caller);
     if(kin and not(QueryWizlvl()))
         myvoslog("与第"&kin&"线路被叫号码重复，怀疑三方通话，拒绝接入"&IsCallout);
         Nplay("sysbusy");
@@ -577,7 +585,8 @@ enddec
         kin=MyDigit("gly_1",1,"1234567890");#"你的号码是管理员号码，按9号键进入管理菜单，按其他键进入排行榜",
         switch(kin)
         case 9:
-            pwd=ExecSqlA("select isnull((select pwd from t_administrators where caller='"&Caller&"'),'"&substr(date(),3,4)&substr(time(),1,2)&"') ");
+            #pwd=ExecSqlA("select isnull((select pwd from t_administrators where caller='"&Caller&"'),'"&substr(date(),3,4)&substr(time(),1,2)&"') ");
+            pwd=ai_getUserPassword(Caller,substr(date(),3,4)&substr(time(),1,2));
             while(1)
                 li=MyDigit("tc66",20,"#1234567890");#请输入密码，按#号键确定
                 if(pwd)
@@ -614,7 +623,8 @@ enddec
                 case "999":
                     if(QueryWizlvl() > 4 and MyDigit("gly_9",1,"0123456789") eq 1)#"你即将重置系统，确认请按1",
                         myvoslog(Caller&"发起重置系统的指令");
-                        ExecSqlA("{call ln_off_all("&MAXLINE&")}");
+                        #ExecSqlA("{call ln_off_all("&MAXLINE&")}");
+                        ln_off_all(MAXLINE);
                         jk_RebootSystem();
                         while(1) sleep(1); endwhile
                     endif
@@ -672,16 +682,19 @@ dec
 enddec
     timeout_check();
     voslog("menu_call("&menuKey&") is called!");
-    menuType=strrtrim(ExecSqlA("{call mnu_getType('"&menuKey&"')}"));
+    #menuType=strrtrim(ExecSqlA("{call mnu_getType('"&menuKey&"')}"));
+    menuType=strrtrim(db_getMenuType(menuKey));
     if(not(menuType))
         voslog("错误的菜单KEY:"&menuKey);
         voslog("menu_call("&menuKey&") is over!ERROR");
         return 1;
     endif
     voslog("menuType="&menuType);
-    keyallow=strrtrim(ExecSqlA("{call mnu_getKeyList('"&menuKey&"')}"));
+    #keyallow=strrtrim(ExecSqlA("{call mnu_getKeyList('"&menuKey&"')}"));
+    keyallow=strrtrim(db_getMenuKeyList(menuKey&));
     voslog("mnu_getKeyList="&keyallow);
-    menuString=strrtrim(ExecSqlA("{call mnu_getString('"&menuKey&"','"&menuType&"')}"));
+   # menuString=strrtrim(ExecSqlA("{call mnu_getString('"&menuKey&"','"&menuType&"')}"));
+    menuString=strrtrim(db_getMenuString(menuKey,menuType));
     voslog("menuString="&menuString);
     switch(menuType)
     case "TTS":
@@ -735,7 +748,8 @@ dec
 enddec
     voslog("准备收听排行榜"&menuKey);
     area_code=ai_getProvince(Caller);
-    li=ExecSqlA("{call getTopInfo('"&menuKey&"','"&AreaCode&"')}");
+    #li=ExecSqlA("{call getTopInfo('"&menuKey&"','"&AreaCode&"')}");
+    li=db_getTopInfo(menuKey,AreaCode);
     if(not(li))
         myvoslog("排行榜信息不存在menu_key["&menuKey&"] area_code["&area_code&"]");
         return 2;
@@ -743,9 +757,12 @@ enddec
     top_id=Par(li,0);
     top_name=Par(li,1);
     voslog("排行榜信息top_id["&top_id&"]top_name["&top_name&"]");
-    voc_pre_play=ExecSqlA("{call getTopInfoVoc("&top_id&",1)}");
-    voc_tts_template=ExecSqlA("{call getTopInfoVoc("&top_id&",2)}");
-    voc_sms_send_over=ExecSqlA("{call getTopInfoVoc("&top_id&",3)}");
+    #voc_pre_play=ExecSqlA("{call getTopInfoVoc("&top_id&",1)}");
+    #voc_tts_template=ExecSqlA("{call getTopInfoVoc("&top_id&",2)}");
+    #voc_sms_send_over=ExecSqlA("{call getTopInfoVoc("&top_id&",3)}");
+    voc_pre_play=db_getTopInfoVoc(top_id,1);
+    voc_tts_template=db_getTopInfoVoc(top_id,2);
+    voc_sms_send_over=db_getTopInfoVoc(top_id,3);;
     if(not(voc_pre_play and voc_tts_template and voc_sms_send_over))
         voslog("没有获取到正确的排行榜语音信息"&voc_pre_play&"/"&voc_tts_template&"/"&voc_sms_send_over);
         return 3;
@@ -760,16 +777,16 @@ enddec
         if(last_no <> top_no)
             last_no=top_no;
             
-            sp_id=ExecSqlA("{call getTopList("&top_id&","&top_no&",1)}");
-            
+            #sp_id=ExecSqlA("{call getTopList("&top_id&","&top_no&",1)}");
+            sp_id=db_getTopList(top_id,top_no,1);
             if(not(sp_id))
                 voslog("没有取得第"&top_no&"条排行榜信息（榜尾？）");
                 break;
             endif
-            sp_name=ExecSqlA("{call getTopList("&top_id&","&top_no&",2)}");
-            sp_pid=ExecSqlA("{call getTopList("&top_id&","&top_no&",3)}");
-            sp_pname=ExecSqlA("{call getTopList("&top_id&","&top_no&",4)}");
-            sp_demo_voc=ExecSqlA("{call getTopList("&top_id&","&top_no&",5)}");
+            sp_name=db_getTopList(top_id,top_no,2);#ExecSqlA("{call getTopList("&top_id&","&top_no&",2)}");
+            sp_pid=db_getTopList(top_id,top_no,3);#ExecSqlA("{call getTopList("&top_id&","&top_no&",3)}");
+            sp_pname=db_getTopList(top_id,top_no,4);#ExecSqlA("{call getTopList("&top_id&","&top_no&",4)}");
+            sp_demo_voc=db_getTopList(top_id,top_no,5);#ExecSqlA("{call getTopList("&top_id&","&top_no&",5)}");
             
             #voc_tts_template="$top_name排行榜第$top_no名是$sp_name的$sp_pname";
             voc_tts_template=ai_strReplace(voc_tts_template,"$top_name",top_name);
@@ -796,7 +813,8 @@ enddec
                 switch(li)
                 case "*":return "*";
                 case "#":#todo:发送短信
-                    ExecSqlA("{call addSmsSendRequest('"&Caller&"',"&top_id&",'"&top_name&"',"&sp_id&",'"&sp_name&"',"&sp_pid&",'"&sp_pname&"')}");
+                    #ExecSqlA("{call addSmsSendRequest('"&Caller&"',"&top_id&",'"&top_name&"',"&sp_id&",'"&sp_name&"',"&sp_pid&",'"&sp_pname&"')}");
+                    ai_SendSms(Caller,top_id,top_name,sp_id,sp_name,sp_pid,sp_pname);
                     doSmartPlay(voc_sms_send_over);
                 case 1:#下一条
                     top_no++;

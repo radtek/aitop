@@ -18,6 +18,13 @@
 #include <afxdao.h>			// MFC DAO 数据库类
 #endif // _AFX_NO_DAO_SUPPORT
 
+// 简单实现，不必抽取接口
+// struct IDbInterface{
+// 	virtual int ExecSqlA(LPCSTR sql,char *rets)=0;
+// 	virtual int ExecSqlB(LPCSTR sql)=0;
+// 	virtual int OpenDatabase(LPCSTR str=NULL)=0;
+// };
+
 class IDataBase  
 {
 public:

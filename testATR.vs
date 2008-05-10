@@ -25,6 +25,12 @@ program
             i=kb_get();
             voslog("press "&i);
         endif
+        voslog(readreg("bShutDown"));
+        if(readreg("bShutDown"))
+            writereg("bShutDown","");
+            break;
+        endif
+        sleep(10);
     endwhile
     exit(0);
 endprogram

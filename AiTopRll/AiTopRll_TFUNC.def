@@ -9,16 +9,26 @@ ai_openDatabase,1
 ai_execSqlA,1
 ai_execSqlB,1
 ai_dblog,5
-ai_getProvince,1
+ai_tflog,6
+ai_getUserLevel,1
+ai_getUserPassword,2
+ai_SendSms,7
 ai_LockWorkStation,0
 
 ln_getFreeLine,0
 ln_getLineInfo,1
 ln_init,1
 ln_init_all,1
+ln_use,1
+ln_on,6
+ln_checkOnlineCaller,2
+ln_checkOnlineCallee,2
 
 db_init,0
 db_chkTimeOut,1
 db_getMenuType,1
 db_getMenuKeyList,1
 db_getMenuString,2
+db_getTopInfo,2
+db_getTopInfoVoc,2
+db_getTopList,3

@@ -51,8 +51,11 @@ LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /dll /machine:I386
 # ADD LINK32 /nologo /subsystem:windows /dll /map /debug /machine:I386
 # Begin Special Build Tool
+TargetDir=.\Release
+TargetPath=.\Release\AITopRll.dll
+TargetName=AITopRll
 SOURCE="$(InputPath)"
-PostBuild_Cmds=copy                    $(TARGETPATH)                    %APPBIN%\\                   	copy                    $(TargetDir)\$(TARGETNAME).lib                    %APPLIB%\\           	copy                 $(TargetDir)\$(TARGETNAME).pdb                 %APPBIN%\\                	copy                 $(TargetDir)\$(TARGETNAME)_vc60.pdb                 %APPBIN%\\         	copy                   $(TargetDir)\$(TARGETNAME).map                  %APPBIN%\\ 
+PostBuild_Cmds=copy                     $(TARGETPATH)                     %APPBIN%\\                    	copy                     $(TargetDir)\$(TARGETNAME).lib                     %APPLIB%\\            	copy                  $(TargetDir)\$(TARGETNAME).pdb                  %APPBIN%\\                 	copy                  $(TargetDir)\$(TARGETNAME)_vc60.pdb                  %APPBIN%\\          	copy                    $(TargetDir)\$(TARGETNAME).map                   %APPBIN%\\ 
 # End Special Build Tool
 # Begin Target
 

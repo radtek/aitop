@@ -26,7 +26,22 @@ drop PROCEDURE [dbo].[ActCreateTflog]
 drop PROCEDURE [dbo].[getTopInfo]
 drop PROCEDURE [dbo].[getTopInfoVoc]
 drop PROCEDURE [dbo].[getTopList]
+drop PROCEDURE [dbo].getProvince
 drop PROCEDURE [dbo].addSmsSendRequest
+drop PROCEDURE [dbo].pickSmsFromQueue
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[t_localAreaCode]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+drop table [dbo].[t_localAreaCode]
+GO
+
+CREATE TABLE [dbo].[t_localAreaCode] (
+	[caller] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[province] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[city] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[prefix] [char] (10) COLLATE Chinese_PRC_CI_AS NOT NULL 
+) ON [PRIMARY]
+GO
+
 
 CREATE TABLE [dbo].[t_sms_queue] (
 	[idx] [int] IDENTITY (1, 1) NOT NULL ,
@@ -168,6 +183,31 @@ CREATE TABLE [dbo].[XltVosLog] (
 	[Logstr] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
 	[dt] [datetime] NULL CONSTRAINT [DF_XltVoiceLog_dt] DEFAULT (getdate())
 ) ON [PRIMARY]
+GO
+
+CREATE PROCEDURE [dbo].pickSmsFromQueue
+AS
+--SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns1__send(struct soap *soap, const char *soap_endpoint, const char *soap_action, int _cp_USCOREid, int _serviceid, char *_usernumber, int _timelen, int &_sendReturn)
+--soap_call_ns1__send(soap,NULL,NULL,cp_uscoreid,serviceid,usernumber,timelen,result);
+declare @cid int
+declare @sid int
+declare @idx int
+declare @un char(32)
+select top 1 @idx=idx,@cid=sp_id,@sid=sp_pid,@un=caller from t_sms_queue where state=0 and cnt < 3 order by idx;
+if @@rowcount =0 or @idx is null or @cid is null or @sid is null or @un is null
+begin
+	select ''
+	return
+end
+--²âÊÔ×¢ÊÍµôÏÂÃæµÄ×´Ì¬ÐÞ¸ÄÓï¾ä
+--update t_sms_queue set state=1,cnt=cnt+1 where idx=@idx
+select cast(@idx as varchar(32))+' '+cast(@cid as varchar(32))+' '+cast(@sid as varchar(32))+' '+@un
+GO
+
+CREATE  PROCEDURE [dbo].getProvince
+@caller char(32)
+AS
+select isnull((select ltrim(rtrim(prefix))+' '+ltrim(rtrim(province))+' '+ltrim(rtrim(city)) from t_localAreaCode where caller=@caller),'')
 GO
 
 CREATE  PROCEDURE [dbo].addSmsSendRequest
