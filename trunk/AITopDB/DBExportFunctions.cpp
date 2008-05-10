@@ -99,10 +99,10 @@ CString ReadReg(LPCTSTR Key,LPCTSTR REG="SOFTWARE\\KunLun",HKEY hKey =HKEY_LOCAL
 }
 
 
-LPCSTR readreg(const char *argv)
+LPCSTR readreg(const char *argv,LPCTSTR REG,HKEY hKey)
 {
     static char vstr[128];
-	CString tmp=ReadReg(argv);
+	CString tmp=ReadReg(argv,REG,hKey);
 	int i=tmp.GetLength ();
 	if(i>127)
 	{
@@ -112,4 +112,69 @@ LPCSTR readreg(const char *argv)
 	else
 		strcpy(vstr,tmp);
 	return vstr;
+}
+
+BOOL writereg(LPCTSTR Key,LPCTSTR Value,LPCTSTR REG /*= "SOFTWARE\\KunLun"*/,HKEY hKey /*=HKEY_LOCAL_MACHINE*/)
+{
+	//HKEY_LOCAL_MACHINE\SOFTWARE\KunLun 
+	HKEY hVersion;
+	long key;
+	DWORD dwPos;
+	key=::RegCreateKeyEx(hKey,REG , 
+		0, NULL, REG_OPTION_NON_VOLATILE,KEY_WRITE, NULL,&hVersion,&dwPos);
+	if(key==ERROR_SUCCESS)
+	{
+		unsigned long dwType=REG_SZ, dwBytes=(unsigned long)strlen(Value)+1;
+		key=::RegSetValueEx(hVersion,Key,
+			0,dwType,(CONST BYTE *)Value,dwBytes);
+		if(key!=ERROR_SUCCESS)
+		{
+			LPVOID lpMsgBuf;
+			if (!FormatMessage( 
+				FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+				FORMAT_MESSAGE_FROM_SYSTEM | 
+				FORMAT_MESSAGE_IGNORE_INSERTS,
+				NULL,
+				key,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+				(LPTSTR) &lpMsgBuf,
+				0,
+				NULL ))
+			{
+				// Handle the error.
+				return FALSE;
+			}
+			// Display the string.
+			TRACE( "·ÃÎÊ×¢²á±í%s\\%s´íÎó£º%s\n",REG,Key, (LPCTSTR)lpMsgBuf);
+			// Free the buffer.
+			LocalFree( lpMsgBuf );
+			::RegCloseKey(hVersion);
+			return FALSE;
+		}
+		::RegCloseKey(hVersion);
+	} else
+	{
+		LPVOID lpMsgBuf;
+		if (!FormatMessage( 
+			FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+			FORMAT_MESSAGE_FROM_SYSTEM | 
+			FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,
+			key,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+			(LPTSTR) &lpMsgBuf,
+			0,
+			NULL ))
+		{
+			// Handle the error.
+			return FALSE;
+		}
+		// Display the string.
+		TRACE( "·ÃÎÊ×¢²á±í%s\\%s´íÎó£º%s\n",REG,Key, (LPCTSTR)lpMsgBuf);
+		// Free the buffer.
+		LocalFree( lpMsgBuf );
+		::RegCloseKey(hVersion);
+		return FALSE;
+	}
+	return TRUE;
 }

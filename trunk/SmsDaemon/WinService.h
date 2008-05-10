@@ -17,7 +17,7 @@ inline const char* getServieStopEventName( char* event_name )
 {
 	sprintf( event_name, "Global\\%s_STOP_EVENT_NAME", get_service_name() );//@@@
 	//	pm_sprintf( event_name, "%s_STOP_EVENT_NAME", get_service_name() );//@@@
-	printf("event_name=[%s]",event_name);
+	printf("event_name=[%s]\r\n",event_name);
 	return event_name;
 }
 
@@ -27,7 +27,7 @@ inline const char* getServieStopEventName( char* event_name )
 */
 inline void stop_service_()
 {
-	printf("stop service[%s]", get_service_name());//@@@
+	printf("stop service[%s]\r\n", get_service_name());//@@@
 	char event_name[255];
 	getServieStopEventName( event_name );
 	HANDLE hEvent = CreateEvent( NULL, TRUE, FALSE, event_name ); 
@@ -48,7 +48,7 @@ inline void stop_service_()
 inline void init_service_()
 {
 //	pm_log_open("c:\\services.log");
-	printf("set_service_name %s",SERVICE_NAME);//@@@
+	printf("set_service_name %s\r\n",SERVICE_NAME);//@@@
 	set_service_name( SERVICE_NAME );
 	set_service_options( SERVICE_NAME,
 		FALSE,  
@@ -87,7 +87,7 @@ inline int run_service_( int argc, char* argv[])
 	HANDLE hEvent = CreateEvent( NULL, TRUE, FALSE, event_name ); 
 	if( hEvent == NULL ) 
 	{
-		printf("Create event[%s] ", event_name);//@@@
+		printf("Create event[%s] \r\n", event_name);//@@@
 		return -1;
 	}
 	GetServiceStopEvent( TRUE, hEvent );//save

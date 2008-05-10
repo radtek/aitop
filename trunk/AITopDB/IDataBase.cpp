@@ -3,10 +3,21 @@
 //////////////////////////////////////////////////////////////////////
 #include "StdAfx.h"
 #include "IDataBase.h"
-
+#include <iostream>
+#include <string>
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
+
+using namespace std;
+
+string trimString(string str1,string str2)
+{
+	str1.erase(str1.find_last_not_of(str2)+1);
+	str1.erase(0,str1.find_first_not_of(str2));
+	return str1;
+}
+
 
 IDataBase::IDataBase()
 {
@@ -79,6 +90,7 @@ int IDataBase::ExecSqlA(LPCSTR sql,char * rets)
 		for(i=0;i<j;i++)
 		{
 			rs.GetFieldValue(i,rettmp);
+			rettmp=trimString((LPCSTR)rettmp," ").c_str();
 			if(i==0) //用这个判断去除第一个多余的空格
 				ret=rettmp;
 			else

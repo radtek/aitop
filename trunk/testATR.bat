@@ -1,5 +1,6 @@
-vlc6w -e -raitoprll testATR
+d:
+cd \998\aitop
+vlc6w -e -raitoprll;mfcrll testATR
 type vlc.err
 vxpatch testATR.vx
-pause
-vos6w -d -raitoprll testATR
+vos6w -d -raitoprll;mfcrll testATR
