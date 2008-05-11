@@ -87,6 +87,7 @@ program
     if (not(tf_init("")) and readreg("TESTPC") streq "") 
         exit(0); 
     endif
+    ai_LockWorkStation();
     voslog("卡序列号："&tf_cardsn());
     MAXLINE=tf_lines(0);
     writereg("VosLoading",0);
@@ -128,6 +129,12 @@ program
             voslog("VOS消息slots不够分配，重新启动VOS初始化运行环境");
             exit(1);
         endif
+        #voslog(readreg("bShutDown"));
+        if(readreg("bShutDown"))
+            writereg("bShutDown","");
+            break;
+        endif
+
         if (kb_qsize()>0)
             if (kb_getx() streq "011b")
                 exit_cnt++;
@@ -217,7 +224,7 @@ program
             voslog("主线程收到VOS消息["&msg&"]");
         endif
     endwhile
-    voslog("错误：VOS主线程退出！");
+    voslog("注意：VOS主线程退出！");
     tf_exit();
     exit(0);
 endprogram
@@ -433,7 +440,7 @@ enddec
     endif
     voslog("menuType="&menuType);
     #keyallow=strrtrim(ExecSqlA("{call mnu_getKeyList('"&menuKey&"')}"));
-    keyallow=strrtrim(db_getMenuKeyList(menuKey&));
+    keyallow=strrtrim(db_getMenuKeyList(menuKey));
     
     voslog("mnu_getKeyList="&keyallow);
    # menuString=strrtrim(ExecSqlA("{call mnu_getString('"&menuKey&"','"&menuType&"')}"));

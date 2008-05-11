@@ -7,6 +7,8 @@ drop TABLE [dbo].[tflog]
 drop TABLE [dbo].[t_aimenu] 
 drop TABLE [dbo].[XltVosLog] 
 drop TABLE [dbo].[t_sms_queue]
+drop TABLE [dbo].[t_toptype]
+drop TABLE [dbo].[t_vocinfo]
 drop PROCEDURE [dbo].mnu_getType
 drop PROCEDURE [dbo].mnu_getString
 drop PROCEDURE [dbo].mnu_getKeyList
@@ -33,6 +35,18 @@ drop PROCEDURE [dbo].pickSmsFromQueue
 if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[t_localAreaCode]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
 drop table [dbo].[t_localAreaCode]
 GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[t_vocinfo]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+drop table [dbo].[t_vocinfo]
+GO
+
+CREATE TABLE [dbo].[t_vocinfo] (
+	[idx] [int] IDENTITY (1, 1) NOT NULL ,
+	[vockey] [varchar] (127) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[vocinfo] [varchar] (127) COLLATE Chinese_PRC_CI_AS NOT NULL 
+) ON [PRIMARY]
+GO
+
 
 CREATE TABLE [dbo].[t_localAreaCode] (
 	[caller] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
@@ -64,17 +78,11 @@ CREATE TABLE [dbo].[t_sms_queue] (
 ) ON [PRIMARY]
 GO
 
-
-
-
 CREATE TABLE [dbo].[t_topinfo] (
 	[top_id] [int] NOT NULL ,
-	[top_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[top_type] [int] NOT NULL ,
 	[area_code] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[menu_key] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
-	[voc_preplay] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
-	[voc_tts_template] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
-	[voc_sms_sendover] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
 	CONSTRAINT [IX_t_topinfo] UNIQUE  NONCLUSTERED 
 	(
 		[top_id]
@@ -88,6 +96,15 @@ CREATE TABLE [dbo].[t_topinfo] (
 GO
 
 
+CREATE TABLE [dbo].[t_toptype] (
+	[top_type] [int] NOT NULL ,
+	[top_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[voc_preplay] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	[voc_tts_template] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+	[voc_sms_sendover] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
+
+) ON [PRIMARY]
+GO
 
 CREATE TABLE [dbo].[t_toplist] (
 	[top_id] [int] NOT NULL ,
@@ -97,10 +114,6 @@ CREATE TABLE [dbo].[t_toplist] (
 	[sp_pid] [int] NULL ,
 	[sp_pname] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[sp_demo_voc] [varchar] (127) COLLATE Chinese_PRC_CI_AS NULL ,
-	CONSTRAINT [IX_t_toplist] UNIQUE  NONCLUSTERED 
-	(
-		[top_id]
-	)  ON [PRIMARY] 
 ) ON [PRIMARY]
 GO
 
@@ -112,7 +125,7 @@ CREATE TABLE [dbo].[t_administrators] (
 GO
 
 
-CREATE TABLE [t_line] (
+CREATE TABLE [dbo].[t_line] (
 	[id] [int] IDENTITY (1, 1) NOT NULL ,
 	[ln] [int] NOT NULL ,
 	[enable] [int] NOT NULL CONSTRAINT [DF_t_line_enable] DEFAULT (1),
@@ -220,7 +233,7 @@ CREATE  PROCEDURE [dbo].addSmsSendRequest
 @sp_pname char(32)
 AS
 insert into t_sms_queue(caller,top_id,top_name,sp_id,sp_name,sp_pid,sp_pname) values(@caller,@top_id,@top_name,@sp_id,@sp_name,@sp_pid,@sp_pname)
-select '1'
+select top 1 idx from t_sms_queue where caller=@caller order by ctime desc
 GO
 
 
@@ -228,21 +241,23 @@ CREATE PROCEDURE [dbo].[getTopInfo]
 @mnuKey char (32),
 @areaCode char (32)
  AS  
-select top_id,top_name from t_topinfo where @mnuKey=menu_key and @areaCode=area_code
+select top_id,top_type from t_topinfo where @mnuKey=menu_key and @areaCode=area_code
 if @@rowcount=0
     select '' as errorno
 GO
 
 CREATE PROCEDURE [dbo].[getTopInfoVoc]
-@top_id int,
+@top_type int,
 @f int
  AS  
 if @f = 1
-    select voc_preplay from t_topinfo where @top_id=top_id
+    select voc_preplay from t_toptype where @top_type=top_type
 if @f = 2
-    select voc_tts_template from t_topinfo where  @top_id=top_id
+    select voc_tts_template from t_toptype where  @top_type=top_type
 if @f = 3
-    select voc_sms_sendover from t_topinfo where  @top_id=top_id
+    select voc_sms_sendover from t_toptype where  @top_type=top_type
+if @f = 4
+    select top_name from t_toptype where @top_type=top_type
 if @@rowcount=0
     select '' as errorno
 GO

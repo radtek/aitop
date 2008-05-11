@@ -21,6 +21,8 @@ ln_init,1
 ln_init_all,1
 ln_use,1
 ln_on,6
+ln_off,1
+ln_off_all,1
 ln_checkOnlineCaller,2
 ln_checkOnlineCallee,2
 
@@ -32,3 +34,4 @@ db_getMenuString,2
 db_getTopInfo,2
 db_getTopInfoVoc,2
 db_getTopList,3
+db_getVocInfo,1
