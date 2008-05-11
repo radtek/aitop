@@ -150,9 +150,10 @@ void threadFunc(void *)
 void threadFuncVos(void *p)
 {
 	char strcmd[1024];
-	strcpy(strcmd,readreg("VOSRUNPATH"));
-	if(*strcmd!=0)
-		SetCurrentDirectory(strcmd);
+	char strcurdir[1024];
+	char strprestart[1024];
+	strcpy(strcurdir,readreg("VOSRUNPATH"));
+	strcpy(strprestart,readreg("VOSRUNPRECMD"));
 	strcpy(strcmd,readreg("VOSRUNCMD"));
 	if(*strcmd==0)
 	{
@@ -160,12 +161,19 @@ void threadFuncVos(void *p)
 		printf("Need regkey VOSCMD to run APP!\r\n");
 		return ;
 	}
+	printf("VOSRUNPATH=%s\r\n",strcurdir);
+	printf("VOSRUNPRECMD=%s\r\n",strprestart);
+	printf("VOSRUNCMD=%s\r\n",strcmd);
 	while(1)
 	{
 		CHECK_TO_QUIT_VOID;
+		if(*strcurdir!=0)
+			SetCurrentDirectory(strcurdir);
+		if(*strprestart!=0)
+			system(strprestart);
 		system(strcmd);
-		if(atoi(readreg("bShutDown")))
-			break;
+// 		if(atoi(readreg("bShutDown")))
+// 			break;
 	}
 }
 
@@ -182,7 +190,7 @@ INT_MAIN_ARGC_ARGV
 {
 	hStopEvent = GetServiceStopEvent();
 	_beginthread(threadFunc,0,0);//启动短信轮询线程
-//	_beginthread(threadFuncVos,0,0);//启动VOS载入线程
+	_beginthread(threadFuncVos,0,0);//启动VOS载入线程
 	loopMessage();
 	//通知VOS停止
 	writereg("bShutDown","1");

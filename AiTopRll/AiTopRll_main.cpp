@@ -55,13 +55,6 @@ t_func vosExit(int argc, char *argv[])
 	return "";
 }
 
-t_func ai_isBlackList(int argc ,char *argv[])
-{
-	if(server.hasContained(argv[0]))
-		return "1";
-	return "";
-}
-
 inline char* trimString(char *str)
 {
 	string strtemp=str;
@@ -70,24 +63,6 @@ inline char* trimString(char *str)
 	return str;
 }
 
-//涉及到远程调用，应该考虑使用线程实现，避免拖慢系统整体响应速度
-//t_func ai_getProvince(int argc ,char *argv[])
-MT_BEGIN_FUNC(ai_getProvince)
-{
-	static char ret[128];
-	//这里应该优先寻找本地的对应表
-	string strsql="{call getProvince('%s')}";
-	strsql+=argv[0];
-	strsql+="')}";
-	strcpy(ret,execSqlA(strsql.c_str()));
-	if(*ret!=0 && atoi(ret)!=0)
-		MT_RETURN(ret);
-	Area area;
-	server.CheckoutArea(argv[0],&area);
-	sprintf(ret,"%s %s %s",trimString(area.prefix),trimString(area.province),trimString(area.city));
-	MT_RETURN(ret);
-}
-MT_END_FUNC(ai_getProvince)
  
 t_func ai_strReplace(int argc,char *argv[])
 {
@@ -214,6 +189,13 @@ t_func ln_off(int argc,char *argv[])
 	return execSqlA(strSql);
 }
 
+t_func ln_off_all(int argc,char *argv[])
+{
+	static char strSql[128];
+	sprintf(strSql,"{call ln_off_all(%s)}",argv[0]);
+	return execSqlA(strSql);
+}
+
 t_func db_init(int argc,char *argv[])
 {
 	execSqlB("{call xlt_init}");//语音程序启动时执行数据库初始化操作
@@ -269,3 +251,39 @@ t_func db_getTopList(int argc,char *argv[])
 	sprintf(strSql,"{call getTopList('%s','%s','%s')}",argv[0],argv[1],argv[2]);
 	return execSqlA(strSql);
 }
+
+t_func db_getVocInfo(int argc,char *argv[])
+{
+	static char strSql[128];
+	sprintf(strSql,"select isnull((select vocinfo from t_vocinfo where vockey='%s'),'')",argv[0]);
+	return execSqlA(strSql);
+
+}
+
+
+MT_BEGIN_FUNC(ai_isBlackList)
+{
+	if(server.hasContained(argv[0]))
+		MT_RETURN("1");
+	MT_RETURN("");
+}
+MT_END_FUNC(ai_isBlackList)
+
+//涉及到远程调用，应该考虑使用线程实现，避免拖慢系统整体响应速度
+//t_func ai_getProvince(int argc ,char *argv[])
+MT_BEGIN_FUNC(ai_getProvince)
+{
+	static char ret[128];
+	//这里应该优先寻找本地的对应表
+	string strsql="{call getProvince('%s')}";
+	strsql+=argv[0];
+	strsql+="')}";
+	strcpy(ret,execSqlA(strsql.c_str()));
+	if(*ret!=0 && atoi(ret)!=0)
+		MT_RETURN(ret);
+	Area area;
+	server.CheckoutArea(argv[0],&area);
+	sprintf(ret,"%s %s %s",trimString(area.prefix),trimString(area.province),trimString(area.city));
+	MT_RETURN(ret);
+}
+MT_END_FUNC(ai_getProvince)

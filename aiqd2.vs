@@ -216,7 +216,7 @@ program
     endif
     
     #ExecSqlA("{call ln_on("&ln&","&(IsCallout+1)&","&IsCallout&",'"&Caller&"','"&Callee&"','"&logstr&"')}");
-    ln_on(ln,(IsCallout+1),IsCallout,Caler,Callee,logstr);
+    ln_on(ln,(IsCallout+1),IsCallout,Caller,Callee,logstr);
         
     if(IsCallout eq 1) #为0或者为2都要允许进入主流程
         voslogln("callout => Callee["&RealCallee&"/"&Callee&"] Caller["&Caller&"] IsCallout["&IsCallout&"] str["&str&"]");
@@ -691,7 +691,7 @@ enddec
     endif
     voslog("menuType="&menuType);
     #keyallow=strrtrim(ExecSqlA("{call mnu_getKeyList('"&menuKey&"')}"));
-    keyallow=strrtrim(db_getMenuKeyList(menuKey&));
+    keyallow=strrtrim(db_getMenuKeyList(menuKey));
     voslog("mnu_getKeyList="&keyallow);
    # menuString=strrtrim(ExecSqlA("{call mnu_getString('"&menuKey&"','"&menuType&"')}"));
     menuString=strrtrim(db_getMenuString(menuKey,menuType));
@@ -731,6 +731,7 @@ endfunc
 func toplist(menuKey)
 dec
     var top_id:32;
+    var top_type:32;
     var top_name:127;
     var voc_pre_play:127;
     var voc_tts_template:127;
@@ -755,14 +756,15 @@ enddec
         return 2;
     endif
     top_id=Par(li,0);
-    top_name=Par(li,1);
+    top_type=Par(li,1);
     voslog("排行榜信息top_id["&top_id&"]top_name["&top_name&"]");
     #voc_pre_play=ExecSqlA("{call getTopInfoVoc("&top_id&",1)}");
     #voc_tts_template=ExecSqlA("{call getTopInfoVoc("&top_id&",2)}");
     #voc_sms_send_over=ExecSqlA("{call getTopInfoVoc("&top_id&",3)}");
-    voc_pre_play=db_getTopInfoVoc(top_id,1);
-    voc_tts_template=db_getTopInfoVoc(top_id,2);
-    voc_sms_send_over=db_getTopInfoVoc(top_id,3);;
+    voc_pre_play=db_getTopInfoVoc(top_type,1);
+    voc_tts_template=db_getTopInfoVoc(top_type,2);
+    voc_sms_send_over=db_getTopInfoVoc(top_type,3);
+    top_name=db_getTopInfoVoc(top_type,4);
     if(not(voc_pre_play and voc_tts_template and voc_sms_send_over))
         voslog("没有获取到正确的排行榜语音信息"&voc_pre_play&"/"&voc_tts_template&"/"&voc_sms_send_over);
         return 3;
@@ -806,7 +808,8 @@ enddec
                 voslog("重复3次无按键操作，挂断");
                 SysHangup();
             endif
-            IplayTTS(voc_tts_template);
+            IplayTTS(voc_tts_template);#播放名次情况
+            doSmartPlay(sp_demo_voc);#播放demo语音
             li=getkey();
             if(li)
                 lj=0;
@@ -816,11 +819,20 @@ enddec
                     #ExecSqlA("{call addSmsSendRequest('"&Caller&"',"&top_id&",'"&top_name&"',"&sp_id&",'"&sp_name&"',"&sp_pid&",'"&sp_pname&"')}");
                     ai_SendSms(Caller,top_id,top_name,sp_id,sp_name,sp_pid,sp_pname);
                     doSmartPlay(voc_sms_send_over);
+                    if(strcnt(getkey(),"*"))
+                        return "*";
+                    endif
+                    top_no++;
                 case 1:#下一条
                     top_no++;
                     break;
                 case 2:#重听
                     continue;
+                case 3:#上一条
+                    if(top_no>1)
+                        top_no--;
+                    endif
+                    break;
                 endswitch
             endif
         endwhile
