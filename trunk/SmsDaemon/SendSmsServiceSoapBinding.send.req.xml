@@ -7,10 +7,10 @@
  xmlns:ns1="http://service.asiainfo.com">
  <SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
   <ns1:send>
-   <cp_id>0</cp_id>
-   <serviceid>0</serviceid>
-   <usernumber></usernumber>
-   <timelen>0</timelen>
+   <cp_id xsi:type="xsd:int">0</cp_id>
+   <serviceid xsi:type="xsd:int">0</serviceid>
+   <usernumber xsi:type="xsd:string"></usernumber>
+   <timelen xsi:type="xsd:int">0</timelen>
   </ns1:send>
  </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>

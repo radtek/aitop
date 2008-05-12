@@ -7,7 +7,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-05-06 16:12:28 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-05-12 15:55:40 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -594,9 +594,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_SOAP_ENV__Fault(struct soap *soap, const char
 		return soap->error;
 	if (soap_out__QName(soap, "faultcode", -1, (char*const*)&soap_tmp_faultcode, ""))
 		return soap->error;
-	if (soap_out_string(soap, "faultstring", -1, &a->faultstring, ""))
+	if (soap_out_string(soap, "faultstring", -1, &a->faultstring, "xsd:string"))
 		return soap->error;
-	if (soap_out_string(soap, "faultactor", -1, &a->faultactor, ""))
+	if (soap_out_string(soap, "faultactor", -1, &a->faultactor, "xsd:string"))
 		return soap->error;
 	if (soap_out_PointerToSOAP_ENV__Detail(soap, "detail", -1, &a->detail, ""))
 		return soap->error;
@@ -1228,13 +1228,13 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__sendFailed(struct soap *soap, const char
 {
 	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ns1__sendFailed), type))
 		return soap->error;
-	if (soap_out_int(soap, "cp_id", -1, &a->_cp_USCOREid, ""))
+	if (soap_out_int(soap, "cp_id", -1, &a->_cp_USCOREid, "xsd:int"))
 		return soap->error;
-	if (soap_out_int(soap, "serviceid", -1, &a->_serviceid, ""))
+	if (soap_out_int(soap, "serviceid", -1, &a->_serviceid, "xsd:int"))
 		return soap->error;
-	if (soap_out_string(soap, "usernumber", -1, &a->_usernumber, ""))
+	if (soap_out_string(soap, "usernumber", -1, &a->_usernumber, "xsd:string"))
 		return soap->error;
-	if (soap_out_string(soap, "content", -1, &a->_content, ""))
+	if (soap_out_string(soap, "content", -1, &a->_content, "xsd:string"))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -1362,7 +1362,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__sendFailedResponse(struct soap *soap, co
 {
 	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ns1__sendFailedResponse), type))
 		return soap->error;
-	if (soap_out_int(soap, "sendFailedReturn", -1, &a->_sendFailedReturn, ""))
+	if (soap_out_int(soap, "sendFailedReturn", -1, &a->_sendFailedReturn, "xsd:int"))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -1479,13 +1479,13 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__send_(struct soap *soap, const char *tag
 {
 	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ns1__send_), type))
 		return soap->error;
-	if (soap_out_int(soap, "cp_id", -1, &a->_cp_USCOREid, ""))
+	if (soap_out_int(soap, "cp_id", -1, &a->_cp_USCOREid, "xsd:int"))
 		return soap->error;
-	if (soap_out_int(soap, "serviceid", -1, &a->_serviceid, ""))
+	if (soap_out_int(soap, "serviceid", -1, &a->_serviceid, "xsd:int"))
 		return soap->error;
-	if (soap_out_string(soap, "usernumber", -1, &a->_usernumber, ""))
+	if (soap_out_string(soap, "usernumber", -1, &a->_usernumber, "xsd:string"))
 		return soap->error;
-	if (soap_out_int(soap, "timelen", -1, &a->_timelen, ""))
+	if (soap_out_int(soap, "timelen", -1, &a->_timelen, "xsd:int"))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -1613,7 +1613,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__send_Response(struct soap *soap, const c
 {
 	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ns1__send_Response), type))
 		return soap->error;
-	if (soap_out_int(soap, "sendReturn", -1, &a->_sendReturn, ""))
+	if (soap_out_int(soap, "sendReturn", -1, &a->_sendReturn, "xsd:int"))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -1730,13 +1730,13 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__send(struct soap *soap, const char *tag,
 {
 	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ns1__send), type))
 		return soap->error;
-	if (soap_out_int(soap, "cp_id", -1, &a->_cp_USCOREid, ""))
+	if (soap_out_int(soap, "cp_id", -1, &a->_cp_USCOREid, "xsd:int"))
 		return soap->error;
-	if (soap_out_int(soap, "serviceid", -1, &a->_serviceid, ""))
+	if (soap_out_int(soap, "serviceid", -1, &a->_serviceid, "xsd:int"))
 		return soap->error;
-	if (soap_out_string(soap, "usernumber", -1, &a->_usernumber, ""))
+	if (soap_out_string(soap, "usernumber", -1, &a->_usernumber, "xsd:string"))
 		return soap->error;
-	if (soap_out_int(soap, "timelen", -1, &a->_timelen, ""))
+	if (soap_out_int(soap, "timelen", -1, &a->_timelen, "xsd:int"))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -1864,7 +1864,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__sendResponse(struct soap *soap, const ch
 {
 	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ns1__sendResponse), type))
 		return soap->error;
-	if (soap_out_int(soap, "sendReturn", -1, &a->_sendReturn, ""))
+	if (soap_out_int(soap, "sendReturn", -1, &a->_sendReturn, "xsd:int"))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }

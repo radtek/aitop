@@ -9,6 +9,9 @@
 DECLARE_SERVICE_FUNCTIONS
 #include "../AITopDB/DBExportFunctions.h"
 
+#include "soapSendSmsServiceSoapBindingProxy.h"
+
+
 struct ERR_INFO{int code;const char*info;};
 
 ERR_INFO error_string[]={
@@ -102,11 +105,20 @@ void threadFunc(void *)
 	}
 	openDatabase(pszOdbcInfo);
 
-	struct soap *soap = soap_new();
+	//struct soap *soap = soap_new();
 	int timelen=0;
 	int result=0;
 	char buf[1024];
 	char *p;
+	char content[]="1";
+	char soap_endpoint[2024];
+	strcpy(soap_endpoint,readreg("soap_endpoint"));
+
+	SendSmsServiceSoapBinding objProxy;
+	soap_init(objProxy.soap);
+
+	if(*soap_endpoint!=0)
+		objProxy.endpoint=soap_endpoint;
 
 	while(1)
 	{
@@ -139,10 +151,10 @@ void threadFunc(void *)
 			++i;
 		}
 
-//			SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns1__send(struct soap *soap, const char *soap_endpoint, const char *soap_action, int _cp_USCOREid, int _serviceid, char *_usernumber, int _timelen, int &_sendReturn)
 		//取到待发送的短信
+		timelen=0;
 		printf("开始发送短信给[%s],sp_id[%d],service_id[%d]=",usernumber,atoi(cp_uscoreid),atoi(serviceid));
-		soap_call_ns1__send(soap,NULL,NULL,atoi(cp_uscoreid),atoi(serviceid),usernumber,timelen,result);
+		objProxy.ns1__send(atoi(cp_uscoreid),atoi(serviceid),usernumber,timelen,result);
 		printf("%s\r\n",getErrorString(result));
 	}
 }
@@ -190,7 +202,7 @@ INT_MAIN_ARGC_ARGV
 {
 	hStopEvent = GetServiceStopEvent();
 	_beginthread(threadFunc,0,0);//启动短信轮询线程
-	_beginthread(threadFuncVos,0,0);//启动VOS载入线程
+// 	_beginthread(threadFuncVos,0,0);//启动VOS载入线程
 	loopMessage();
 	//通知VOS停止
 	writereg("bShutDown","1");

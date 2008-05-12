@@ -7,7 +7,7 @@
  xmlns:ns1="http://service.asiainfo.com">
  <SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
   <ns1:sendResponse>
-   <sendReturn>0</sendReturn>
+   <sendReturn xsi:type="xsd:int">0</sendReturn>
   </ns1:sendResponse>
  </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
