@@ -55,7 +55,7 @@ TargetDir=.\Release
 TargetPath=.\Release\AITopRll.dll
 TargetName=AITopRll
 SOURCE="$(InputPath)"
-PostBuild_Cmds=copy                     $(TARGETPATH)                     %APPBIN%\\                    	copy                     $(TargetDir)\$(TARGETNAME).lib                     %APPLIB%\\            	copy                  $(TargetDir)\$(TARGETNAME).pdb                  %APPBIN%\\                 	copy                  $(TargetDir)\$(TARGETNAME)_vc60.pdb                  %APPBIN%\\          	copy                    $(TargetDir)\$(TARGETNAME).map                   %APPBIN%\\ 
+PostBuild_Cmds=copy                      $(TARGETPATH)                      %APPBIN%\\                     	copy                      $(TargetDir)\$(TARGETNAME).lib                      %APPLIB%\\             	copy                   $(TargetDir)\$(TARGETNAME).pdb                   %APPBIN%\\                  	copy                   $(TargetDir)\$(TARGETNAME)_vc60.pdb                   %APPBIN%\\           	copy                     $(TargetDir)\$(TARGETNAME).map                    %APPBIN%\\ 
 # End Special Build Tool
 # Begin Target
 

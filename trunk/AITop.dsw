@@ -27,6 +27,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "IvrDaemon"=.\IvrDaemon\IvrDaemon.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "SmsDaemon"=.\SmsDaemon\SmsDaemon.dsp - Package Owner=<4>
 
 Package=<5>

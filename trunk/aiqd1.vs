@@ -202,7 +202,8 @@ program
                         voslog("Try to Hide RllDlg");
                     endif
                     jk_ShowRllDlg(showRllDlg);
-                case "l":LoadConfig();
+                case "L":ai_LockWorkStation();
+                case "l":ai_LockWorkStation();
                 case "s":tf_showLines();
                 case "t":
                     voslog("Time:"&(substr((date()&time()),5,6)+0)&" qdup1:"&(readreg("qdup1")+0)&" qdup2:"&(readreg("qdup2")+0) );
