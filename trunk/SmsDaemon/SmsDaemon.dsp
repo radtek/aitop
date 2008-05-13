@@ -38,7 +38,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /ZI /Od /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /ZI /Od /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "SOAP_DEBUG" /FR /YX /FD /c
 # ADD BASE RSC /l 0x804 /d "NDEBUG"
 # ADD RSC /l 0x804 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -48,8 +48,11 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /map /debug /machine:I386
 # Begin Special Build Tool
+TargetDir=.\Release
+TargetPath=.\Release\SmsDaemon.exe
+TargetName=SmsDaemon
 SOURCE="$(InputPath)"
-PostBuild_Cmds=copy                    $(TARGETPATH)                    %APPBIN%\\                   	copy                    $(TargetDir)\$(TARGETNAME).lib                    %APPLIB%\\           	copy                 $(TargetDir)\$(TARGETNAME).pdb                 %APPBIN%\\                	copy                 $(TargetDir)\$(TARGETNAME)_vc60.pdb                 %APPBIN%\\         	copy                   $(TargetDir)\$(TARGETNAME).map                  %APPBIN%\\ 
+PostBuild_Cmds=copy                     $(TARGETPATH)                     %APPBIN%\\                    	copy                     $(TargetDir)\$(TARGETNAME).lib                     %APPLIB%\\            	copy                  $(TargetDir)\$(TARGETNAME).pdb                  %APPBIN%\\                 	copy                  $(TargetDir)\$(TARGETNAME)_vc60.pdb                  %APPBIN%\\          	copy                    $(TargetDir)\$(TARGETNAME).map                   %APPBIN%\\ 
 # End Special Build Tool
 # Begin Target
 

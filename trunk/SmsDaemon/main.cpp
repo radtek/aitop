@@ -123,7 +123,7 @@ void threadFunc(void *)
 	while(1)
 	{
 		CHECK_TO_QUIT_VOID;
-		Sleep(3000);
+		Sleep(1000);
 		strcpy(buf,execSqlA("{call pickSmsFromQueue}"));//select @idx+' '+@cid+' '+@sid+' '+@un
 		if(*buf==0 || *buf==' ')
 		{
@@ -179,6 +179,7 @@ void threadFuncVos(void *p)
 	while(1)
 	{
 		CHECK_TO_QUIT_VOID;
+		Sleep(10);
 		if(*strcurdir!=0)
 			SetCurrentDirectory(strcurdir);
 		if(*strprestart!=0)
@@ -195,6 +196,7 @@ int loopMessage()
 	while(1)
 	{
 		CHECK_TO_QUIT;
+		Sleep(10);
 	}
 }
 
@@ -202,7 +204,7 @@ INT_MAIN_ARGC_ARGV
 {
 	hStopEvent = GetServiceStopEvent();
 	_beginthread(threadFunc,0,0);//启动短信轮询线程
-// 	_beginthread(threadFuncVos,0,0);//启动VOS载入线程
+ 	_beginthread(threadFuncVos,0,0);//启动VOS载入线程
 	loopMessage();
 	//通知VOS停止
 	writereg("bShutDown","1");
