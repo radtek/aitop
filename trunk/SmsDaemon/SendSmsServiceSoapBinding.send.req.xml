@@ -11,6 +11,7 @@
    <serviceid xsi:type="xsd:int">0</serviceid>
    <usernumber xsi:type="xsd:string"></usernumber>
    <timelen xsi:type="xsd:int">0</timelen>
+   <content xsi:type="xsd:string"></content>
   </ns1:send>
  </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>

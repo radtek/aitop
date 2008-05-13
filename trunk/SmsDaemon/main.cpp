@@ -154,7 +154,7 @@ void threadFunc(void *)
 		//取到待发送的短信
 		timelen=0;
 		printf("开始发送短信给[%s],sp_id[%d],service_id[%d]=",usernumber,atoi(cp_uscoreid),atoi(serviceid));
-		objProxy.ns1__send(atoi(cp_uscoreid),atoi(serviceid),usernumber,timelen,result);
+		objProxy.ns1__sendnote(atoi(cp_uscoreid),atoi(serviceid),usernumber,timelen,result);
 		printf("%s\r\n",getErrorString(result));
 	}
 }
