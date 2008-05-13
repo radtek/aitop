@@ -213,7 +213,7 @@ begin
 	return
 end
 --²âÊÔ×¢ÊÍµôÏÂÃæµÄ×´Ì¬ĞŞ¸ÄÓï¾ä
---update t_sms_queue set state=1,cnt=cnt+1 where idx=@idx
+update t_sms_queue set state=1,cnt=cnt+1 where idx=@idx
 select cast(@idx as varchar(32))+' '+cast(@cid as varchar(32))+' '+cast(@sid as varchar(32))+' '+@un
 GO
 
