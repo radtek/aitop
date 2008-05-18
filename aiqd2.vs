@@ -661,7 +661,7 @@ enddec
     endif
    
     while(1) #主菜单
-        menu_call("A");
+        menu_call("A",ai_getProvince(Caller));
     endwhile
 endfunc
 #--------------------------------------------------------
@@ -673,7 +673,7 @@ func timeout_check()
     endif
 endfunc
 #--------------------------------------------------------
-func menu_call(menuKey)
+func menu_call(menuKey,province)
 dec
     var menuType:127;
     var menuString:127;
@@ -683,7 +683,7 @@ enddec
     timeout_check();
     voslog("menu_call("&menuKey&") is called!");
     #menuType=strrtrim(ExecSqlA("{call mnu_getType('"&menuKey&"')}"));
-    menuType=strrtrim(db_getMenuType(menuKey));
+    menuType=strrtrim(db_getMenuType(menuKey,province));
     if(not(menuType))
         voslog("错误的菜单KEY:"&menuKey);
         voslog("menu_call("&menuKey&") is over!ERROR");
@@ -691,24 +691,24 @@ enddec
     endif
     voslog("menuType="&menuType);
     #keyallow=strrtrim(ExecSqlA("{call mnu_getKeyList('"&menuKey&"')}"));
-    keyallow=strrtrim(db_getMenuKeyList(menuKey));
+    keyallow=strrtrim(db_getMenuKeyList(menuKey,province));
     voslog("mnu_getKeyList="&keyallow);
    # menuString=strrtrim(ExecSqlA("{call mnu_getString('"&menuKey&"','"&menuType&"')}"));
-    menuString=strrtrim(db_getMenuString(menuKey,menuType));
+    menuString=strrtrim(db_getMenuString(menuKey,menuType,province));
     voslog("menuString="&menuString);
     switch(menuType)
     case "TTS":
         key=MyDigitTTS(menuString,1,keyallow);
         voslog("key="&key);
-        return menu_call(menuKey&key);
+        return menu_call(menuKey&key,province);
     case "VOC":
         key=MyDigit(menuString,1,keyallow);
         voslog("key="&key);
-        return menu_call(menuKey&key);
+        return menu_call(menuKey&key,province);
     case "VX":#目前先不调用具体的外部程序，先调用内部实现函数
         voslog("调用"&menuString);
         if(strcnt(menuString,"toplist"))
-            toplist(menuKey&key);
+            toplist(menuKey&key,province);
         else
             voslog("Unknow VX flow!");
         endif
@@ -728,7 +728,7 @@ func doSmartPlay(vocstr)
     IplayTTS(vocstr);
 endfunc
 #--------------------------------------------------------
-func toplist(menuKey)
+func toplist(menuKey,province)
 dec
     var top_id:32;
     var top_type:32;
@@ -738,7 +738,6 @@ dec
     var voc_sms_send_over:127;
     var li:127;
     var lj:127;
-    var area_code:127;
     var top_no:2;
     var last_no:2;
     var sp_id:11;
@@ -748,11 +747,9 @@ dec
     var sp_demo_voc:127;
 enddec
     voslog("准备收听排行榜"&menuKey);
-    area_code=ai_getProvince(Caller);
-    #li=ExecSqlA("{call getTopInfo('"&menuKey&"','"&AreaCode&"')}");
-    li=db_getTopInfo(menuKey,AreaCode);
+    li=db_getTopInfo(menuKey,province);
     if(not(li))
-        myvoslog("排行榜信息不存在menu_key["&menuKey&"] area_code["&area_code&"]");
+        myvoslog("排行榜信息不存在menu_key["&menuKey&"] area_code["&province&"]");
         return 2;
     endif
     top_id=Par(li,0);

@@ -28,9 +28,9 @@ ln_checkOnlineCallee,2
 
 db_init,0
 db_chkTimeOut,1
-db_getMenuType,1
-db_getMenuKeyList,1
-db_getMenuString,2
+db_getMenuType,2
+db_getMenuKeyList,2
+db_getMenuString,3
 db_getTopInfo,2
 db_getTopInfoVoc,2
 db_getTopList,3
