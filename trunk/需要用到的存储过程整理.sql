@@ -56,16 +56,17 @@ CREATE TABLE [dbo].[t_localAreaCode] (
 ) ON [PRIMARY]
 GO
 
-
 CREATE TABLE [dbo].[t_sms_queue] (
 	[idx] [int] IDENTITY (1, 1) NOT NULL ,
 	[caller] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[top_id] [int] NOT NULL ,
+	[top_no] [int] NOT NULL ,
 	[top_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[sp_id] [int] NULL ,
 	[sp_name] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[sp_pid] [int] NULL ,
 	[sp_pname] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
+	[snumber] [char] (32) COLLATE Chinese_PRC_CI_AS NOT NULL ,
 	[state] [int] NOT NULL CONSTRAINT [DF__t_sms_que__state__25DB9BFC] DEFAULT (0),
 	[ctime] [datetime] NULL CONSTRAINT [DF_t_sms_queue_ctime] DEFAULT (getdate()),
 	[result] [int] NULL CONSTRAINT [DF_t_sms_queue_result] DEFAULT (0),
@@ -198,24 +199,6 @@ CREATE TABLE [dbo].[XltVosLog] (
 ) ON [PRIMARY]
 GO
 
-CREATE PROCEDURE [dbo].pickSmsFromQueue
-AS
---SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns1__send(struct soap *soap, const char *soap_endpoint, const char *soap_action, int _cp_USCOREid, int _serviceid, char *_usernumber, int _timelen, int &_sendReturn)
---soap_call_ns1__send(soap,NULL,NULL,cp_uscoreid,serviceid,usernumber,timelen,result);
-declare @cid int
-declare @sid int
-declare @idx int
-declare @un char(32)
-select top 1 @idx=idx,@cid=sp_id,@sid=sp_pid,@un=caller from t_sms_queue where state=0 and cnt < 3 order by idx;
-if @@rowcount =0 or @idx is null or @cid is null or @sid is null or @un is null
-begin
-	select ''
-	return
-end
---²âÊÔ×¢ÊÍµôÏÂÃæµÄ×´Ì¬ÐÞ¸ÄÓï¾ä
-update t_sms_queue set state=1,cnt=cnt+1 where idx=@idx
-select cast(@idx as varchar(32))+' '+cast(@cid as varchar(32))+' '+cast(@sid as varchar(32))+' '+@un
-GO
 
 CREATE  PROCEDURE [dbo].getProvince
 @caller char(32)
@@ -223,16 +206,41 @@ AS
 select isnull((select ltrim(rtrim(prefix))+' '+ltrim(rtrim(province))+' '+ltrim(rtrim(city)) from t_localAreaCode where caller=@caller),'')
 GO
 
+
+CREATE PROCEDURE [dbo].pickSmsFromQueue
+AS
+--SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns1__sendnote(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *_typeName, int _spID, int _serviceID, char *_userNumber, int _rank, char *_snumber, int &_sendnoteReturn)
+--virtual int ns1__sendnote(char *_typeName, int _spID, int _serviceID, char *_userNumber, int _rank, char *_snumber, int &_sendnoteReturn)
+declare @cid int
+declare @sid int
+declare @idx int
+declare @tno int
+declare @sn char(32)
+declare @un char(32)
+declare @tn char(32)
+select top 1 @idx=idx,@cid=sp_id,@sid=sp_pid,@tno=top_no,@un=caller,@sn=snumber,@tn=top_name from t_sms_queue where state=0 and cnt < 3 order by idx;
+if @@rowcount =0 or @idx is null or @cid is null or @sid is null or @un is null or @tno is null or @sn is null or @tn is null
+begin
+	select ''
+	return
+end
+--²âÊÔ×¢ÊÍµôÏÂÃæµÄ×´Ì¬ÐÞ¸ÄÓï¾ä
+update t_sms_queue set state=1,cnt=cnt+1 where idx=@idx
+select cast(@idx as varchar(32))+' '+cast(@cid as varchar(32))+' '+cast(@sid as varchar(32))+' '+ltrim(rtrim(@un))+' '+cast(@tno as varchar(32))+' '+ltrim(rtrim(@sn))+' '+ltrim(rtrim(@tn))
+GO
+
 CREATE  PROCEDURE [dbo].addSmsSendRequest
 @caller char(32),
 @top_id int,
 @top_name char(32),
+@top_no int,
 @sp_id int,
 @sp_name char(32),
 @sp_pid int,
-@sp_pname char(32)
+@sp_pname char(32),
+@snumber char(32)
 AS
-insert into t_sms_queue(caller,top_id,top_name,sp_id,sp_name,sp_pid,sp_pname) values(@caller,@top_id,@top_name,@sp_id,@sp_name,@sp_pid,@sp_pname)
+insert into t_sms_queue(caller,top_id,top_name,top_no,sp_id,sp_name,sp_pid,sp_pname,snumber) values(@caller,@top_id,@top_name,@top_no,@sp_id,@sp_name,@sp_pid,@sp_pname,@snumber)
 select top 1 idx from t_sms_queue where caller=@caller order by ctime desc
 GO
 

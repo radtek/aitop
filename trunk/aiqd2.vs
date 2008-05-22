@@ -813,8 +813,17 @@ enddec
                 switch(li)
                 case "*":return "*";
                 case "#":#todo:·¢ËÍ¶ÌÐÅ
-                    #ExecSqlA("{call addSmsSendRequest('"&Caller&"',"&top_id&",'"&top_name&"',"&sp_id&",'"&sp_name&"',"&sp_pid&",'"&sp_pname&"')}");
-                    ai_SendSms(Caller,top_id,top_name,sp_id,sp_name,sp_pid,sp_pname);
+#CREATE  PROCEDURE [dbo].addSmsSendRequest
+#@caller char(32),
+#@top_id int,
+#@top_name char(32),
+#@top_no int,
+#@sp_id int,
+#@sp_name char(32),
+#@sp_pid int,
+#@sp_pname char(32),
+#@snumber char(32)
+                    ai_SendSms(Caller,top_id,top_name,top_no,sp_id,sp_name,sp_pid,sp_pname,sp_pid);
                     doSmartPlay(voc_sms_send_over);
                     if(strcnt(getkey(),"*"))
                         return "*";
