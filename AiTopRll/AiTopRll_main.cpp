@@ -78,7 +78,7 @@ t_func ai_strReplace(int argc,char *argv[])
 t_func ai_SendSms(int argc,char *argv[])
 {
 	static char strSql[128];
-	sprintf(strSql,"{call addSmsSendRequest('%s','%s','%s','%s','%s','%s',%s')}",argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6]);
+	sprintf(strSql,"{call addSmsSendRequest('%s','%s','%s','%s','%s','%s','%s','%s','%s')}",argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8]);
 	return execSqlA(strSql);
 }
 

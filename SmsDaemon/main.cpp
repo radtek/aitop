@@ -111,8 +111,14 @@ void threadFunc(void *)
 	char buf[1024];
 	char *p;
 	char content[]="1";
+
 	char soap_endpoint[2024];
 	strcpy(soap_endpoint,readreg("soap_endpoint"));
+
+	char mycpid[50];
+	strcpy(mycpid,readreg("cpid"));
+	if(*mycpid==0)
+		strcpy(mycpid,"98");
 
 	SendSmsServiceSoapBinding objProxy;
 	soap_init(objProxy.soap);
@@ -124,7 +130,8 @@ void threadFunc(void *)
 	{
 		CHECK_TO_QUIT_VOID;
 		Sleep(1000);
-		strcpy(buf,execSqlA("{call pickSmsFromQueue}"));//select @idx+' '+@cid+' '+@sid+' '+@un
+		//返回串：idx 企业ID 业务ID 用户号码 排行榜名次 拨打号码 排行榜名称
+		strcpy(buf,execSqlA("{call pickSmsFromQueue}"));
 		if(*buf==0 || *buf==' ')
 		{
 			printf("Idle...\r\n");
@@ -134,27 +141,59 @@ void threadFunc(void *)
 		char *cp_uscoreid=NULL;
 		char *serviceid=NULL;
 		char *usernumber=NULL;
+		char *top_no=NULL;
+		char *snumber=NULL;
+		char *top_name=NULL;
 		int i=0;
 		p=buf;
-		while(i<4)
+		while(i<7)
 		{
 			switch(i)
 			{
 			case 0:idx=p;break;
-			case 1:cp_uscoreid=p;break;
+			case 1:
+				//cp_uscoreid=p;break;
+				//固定自己的cpid
+				cp_uscoreid=mycpid;break;
 			case 2:serviceid=p;break;
 			case 3:usernumber=p;break;
+			case 4:top_no=p;break;
+			case 5:snumber=p;break;
+			case 6:top_name=p;break;
 			}
 			p=strchr(p,' ');
 			if(!p) break;
 			*p++=0;
-			++i;
+			++i;             
 		}
+/*
+挂机短信升级信息
+
+  需求：添加一个新的服务接口，要求如下：
+  用户在排行榜中点播的短信内容是：
+  您好,10176活力排行榜推荐的是交友聊天类第1名:我爱我家好事成双,2.5元/分钟,收听请拨101761234,客服电话101760034
+  
+	
+	  
+		服务访问地址：
+		http://220.194.56.196:9058/calldownsms/services/SendSmsService
+		
+		  添加接口名称：
+		  public int sendnote（String typeName, int spID, int serviceID, String userNumber, int rank, String snumber）;
+		  
+			其中，
+			typeName是排行榜类别名称
+			spID是sp的标识；
+			serviceID是排行榜中的业务标识；
+			userNumber是接收短信的用户号码； 
+			rank是该业务的排名；
+			snumber是收听播号
+*/
 
 		//取到待发送的短信
 		timelen=0;
 		printf("开始发送短信给[%s],sp_id[%d],service_id[%d]=",usernumber,atoi(cp_uscoreid),atoi(serviceid));
-		objProxy.ns1__sendnote(atoi(cp_uscoreid),atoi(serviceid),usernumber,timelen,result);
+		objProxy.ns1__sendnote(top_name,atoi(cp_uscoreid),atoi(serviceid),usernumber,atoi(top_no),snumber,result);
 		printf("%s\r\n",getErrorString(result));
 	}
 }

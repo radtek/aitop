@@ -12,7 +12,7 @@ ai_dblog,5
 ai_tflog,6
 ai_getUserLevel,1
 ai_getUserPassword,2
-ai_SendSms,7
+ai_SendSms,9
 ai_LockWorkStation,0
 
 ln_getFreeLine,0
