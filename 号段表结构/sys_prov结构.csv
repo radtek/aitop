@@ -1,0 +1,6 @@
+"Field","Type","Null","Key","Default","Extra"
+"PROV_CODE","varchar(5)","NO","","",""
+"PROV_NAME","varchar(16)","YES","","null",""
+"AREA_CODE","varchar(5)","YES","","null",""
+"DEFAULT_OPERATOR_ID","int(2)","YES","","null",""
+"SHOW_ORDER","int(5)","YES","","null",""

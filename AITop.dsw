@@ -39,31 +39,19 @@ Package=<4>
 
 ###############################################################################
 
+Project: "Services"=.\wjg\Services\Services.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "SmsDaemon"=.\SmsDaemon\SmsDaemon.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "calc"=.\calc\calc.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "calcserver"=.\calcserver\calcserver.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

@@ -1,0 +1,6 @@
+"Field","Type","Null","Key","Default","Extra"
+"HLR_CODE","varchar(8)","NO","PRI","",""
+"BUREAU_CODE","varchar(5)","YES","","null",""
+"AREA_CODE","varchar(5)","YES","","null",""
+"OPERATOR_ID","int(6)","YES","","null",""
+"NET_TYPE","int(2)","YES","","null",""

@@ -1,0 +1,6 @@
+"Field","Type","Null","Key","Default","Extra"
+"AREA_CODE","varchar(5)","NO","PRI","",""
+"CITY_NAME","varchar(16)","YES","","null",""
+"PROV_CODE","varchar(5)","YES","","null",""
+"REGION_CODE","varchar(5)","YES","","null",""
+"SHOW_ORDER","int(5)","YES","","null",""
