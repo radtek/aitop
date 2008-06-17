@@ -143,7 +143,6 @@ public:
 	int _serviceID;	/* required element of type xsd:int */
 	char *_userNumber;	/* optional element of type xsd:string */
 	int _rank;	/* required element of type xsd:int */
-	char *_snumber;	/* optional element of type xsd:string */
 };
 #endif
 
@@ -263,7 +262,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns1__send__(struct soap *soap, const char *s
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns1__sendFailed(struct soap *soap, const char *soap_endpoint, const char *soap_action, int _cp_USCOREid, int _serviceid, char *_usernumber, char *_content, int &_sendFailedReturn);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns1__sendnote(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *_typeName, int _spID, int _serviceID, char *_userNumber, int _rank, char *_snumber, int &_sendnoteReturn);
+SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns1__sendnote(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *_typeName, int _spID, int _serviceID, char *_userNumber, int _rank, int &_sendnoteReturn);
 
 #endif
 

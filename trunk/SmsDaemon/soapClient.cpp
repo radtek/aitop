@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.7.10 2008-05-22 13:34:21 GMT")
+SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.7.10 2008-06-17 15:53:32 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns1__send(struct soap *soap, const char *soap_endpoint, const char *soap_action, int _cp_USCOREid, int _serviceid, char *_usernumber, int _timelen, char *_content, int &_sendReturn)
@@ -240,7 +240,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns1__sendFailed(struct soap *soap, const cha
 	return soap_closesock(soap);
 }
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns1__sendnote(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *_typeName, int _spID, int _serviceID, char *_userNumber, int _rank, char *_snumber, int &_sendnoteReturn)
+SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns1__sendnote(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *_typeName, int _spID, int _serviceID, char *_userNumber, int _rank, int &_sendnoteReturn)
 {	struct ns1__sendnote soap_tmp_ns1__sendnote;
 	struct ns1__sendnoteResponse *soap_tmp_ns1__sendnoteResponse;
 	if (!soap_endpoint)
@@ -253,7 +253,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns1__sendnote(struct soap *soap, const char 
 	soap_tmp_ns1__sendnote._serviceID = _serviceID;
 	soap_tmp_ns1__sendnote._userNumber = _userNumber;
 	soap_tmp_ns1__sendnote._rank = _rank;
-	soap_tmp_ns1__sendnote._snumber = _snumber;
 	soap_begin(soap);
 	soap_serializeheader(soap);
 	soap_serialize_ns1__sendnote(soap, &soap_tmp_ns1__sendnote);

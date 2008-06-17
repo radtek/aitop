@@ -181,19 +181,22 @@ void threadFunc(void *)
 		  添加接口名称：
 		  public int sendnote（String typeName, int spID, int serviceID, String userNumber, int rank, String snumber）;
 		  
-			其中，
-			typeName是排行榜类别名称
-			spID是sp的标识；
-			serviceID是排行榜中的业务标识；
-			userNumber是接收短信的用户号码； 
-			rank是该业务的排名；
-			snumber是收听播号
+		添加接口名称：
+		public int sendnote（String typeName, int spID, int serviceID, String userNumber, int rank）;
+
+		其中，
+		typeName是排行榜类别名称
+		spID是sp的标识；
+		serviceID是排行榜中的业务标识；
+		userNumber是接收短信的用户号码； 
+		rank是该业务的排名； 
+
 */
 
 		//取到待发送的短信
 		timelen=0;
 		printf("开始发送短信给[%s],sp_id[%d],service_id[%d]=",usernumber,atoi(cp_uscoreid),atoi(serviceid));
-		objProxy.ns1__sendnote(top_name,atoi(cp_uscoreid),atoi(serviceid),usernumber,atoi(top_no),snumber,result);
+		objProxy.ns1__sendnote(top_name,atoi(cp_uscoreid),atoi(serviceid),usernumber,atoi(top_no),result);
 		printf("%s\r\n",getErrorString(result));
 	}
 }
