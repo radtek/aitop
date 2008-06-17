@@ -1,0 +1,7 @@
+CPid(企业代码)：98   cpname: 排行榜test
+spid（业务id）: 109801  业务名称：排行榜业务test    客户号码：101760098
+ 
+挂机短信有IP认证机制，我将IP：220.194.53.19 作为了排行榜业务的信任IP
+
+测试手机号码
+insert into t_sms_queue (caller,top_id,top_name,top_no,sp_id,sp_name,sp_pid,sp_pname,snumber) values('8613308793685',1,'top_name1',2,98,'排行榜test',109801,'排行榜业务test','101760093')
