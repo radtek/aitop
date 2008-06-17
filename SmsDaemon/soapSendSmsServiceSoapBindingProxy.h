@@ -37,6 +37,6 @@ class SendSmsServiceSoapBinding
 	/// Invoke 'sendFailed' of service 'SendSmsServiceSoapBinding' and return error code (or SOAP_OK)
 	virtual int ns1__sendFailed(int _cp_USCOREid, int _serviceid, char *_usernumber, char *_content, int &_sendFailedReturn) { return soap ? soap_call_ns1__sendFailed(soap, endpoint, NULL, _cp_USCOREid, _serviceid, _usernumber, _content, _sendFailedReturn) : SOAP_EOM; };
 	/// Invoke 'sendnote' of service 'SendSmsServiceSoapBinding' and return error code (or SOAP_OK)
-	virtual int ns1__sendnote(char *_typeName, int _spID, int _serviceID, char *_userNumber, int _rank, char *_snumber, int &_sendnoteReturn) { return soap ? soap_call_ns1__sendnote(soap, endpoint, NULL, _typeName, _spID, _serviceID, _userNumber, _rank, _snumber, _sendnoteReturn) : SOAP_EOM; };
+	virtual int ns1__sendnote(char *_typeName, int _spID, int _serviceID, char *_userNumber, int _rank, int &_sendnoteReturn) { return soap ? soap_call_ns1__sendnote(soap, endpoint, NULL, _typeName, _spID, _serviceID, _userNumber, _rank, _sendnoteReturn) : SOAP_EOM; };
 };
 #endif

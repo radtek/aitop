@@ -7,7 +7,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-05-22 13:34:21 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-06-17 15:53:32 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -1284,7 +1284,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns1__sendnote(struct soap *soap, struct 
 	soap_default_int(soap, &a->_serviceID);
 	soap_default_string(soap, &a->_userNumber);
 	soap_default_int(soap, &a->_rank);
-	soap_default_string(soap, &a->_snumber);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns1__sendnote(struct soap *soap, const struct ns1__sendnote *a)
@@ -1292,7 +1291,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns1__sendnote(struct soap *soap, const
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_serialize_string(soap, &a->_typeName);
 	soap_serialize_string(soap, &a->_userNumber);
-	soap_serialize_string(soap, &a->_snumber);
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns1__sendnote(struct soap *soap, const struct ns1__sendnote *a, const char *tag, const char *type)
@@ -1317,8 +1315,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__sendnote(struct soap *soap, const char *
 		return soap->error;
 	if (soap_out_int(soap, "rank", -1, &a->_rank, "xsd:int"))
 		return soap->error;
-	if (soap_out_string(soap, "snumber", -1, &a->_snumber, "xsd:string"))
-		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
@@ -1332,7 +1328,7 @@ SOAP_FMAC3 struct ns1__sendnote * SOAP_FMAC4 soap_get_ns1__sendnote(struct soap 
 
 SOAP_FMAC3 struct ns1__sendnote * SOAP_FMAC4 soap_in_ns1__sendnote(struct soap *soap, const char *tag, struct ns1__sendnote *a, const char *type)
 {
-	short soap_flag__typeName = 1, soap_flag__spID = 1, soap_flag__serviceID = 1, soap_flag__userNumber = 1, soap_flag__rank = 1, soap_flag__snumber = 1;
+	short soap_flag__typeName = 1, soap_flag__spID = 1, soap_flag__serviceID = 1, soap_flag__userNumber = 1, soap_flag__rank = 1;
 	if (soap_element_begin_in(soap, tag, 0, type))
 		return NULL;
 	a = (struct ns1__sendnote *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_ns1__sendnote, sizeof(struct ns1__sendnote), 0, NULL, NULL, NULL);
@@ -1366,11 +1362,6 @@ SOAP_FMAC3 struct ns1__sendnote * SOAP_FMAC4 soap_in_ns1__sendnote(struct soap *
 			if (soap_flag__rank && soap->error == SOAP_TAG_MISMATCH)
 				if (soap_in_int(soap, NULL, &a->_rank, "xsd:int"))
 				{	soap_flag__rank--;
-					continue;
-				}
-			if (soap_flag__snumber && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-				if (soap_in_string(soap, NULL, &a->_snumber, "xsd:string"))
-				{	soap_flag__snumber--;
 					continue;
 				}
 			if (soap->error == SOAP_TAG_MISMATCH)
